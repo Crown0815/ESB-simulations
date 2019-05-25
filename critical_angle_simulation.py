@@ -12,7 +12,11 @@ def critical_angle(candy_radius, rod_length, rod_radius):
         angle += pi / 100000
     if rod_radius >= candy_radius:
         return 0
-    return angle / pi * 180
+    return angle
+
+
+def critical_angle_degrees(candy_radius, rod_length, rod_radius):
+    critical_angle(candy_radius, rod_length, rod_radius) / pi * 180
 
 
 def critical_angle_equation(candy_radius, rod_length, rod_radius, angle):
