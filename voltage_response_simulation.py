@@ -115,6 +115,11 @@ def inflection_point(fluorescence: dict) -> int:
     return diff_fluo.argmin()
 
 
+def inflection_point_slope(fluorescence: dict) -> int:
+    diff_fluo = np.diff(list(fluorescence.values()))
+    return diff_fluo.min()
+
+
 
 
 
