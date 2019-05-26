@@ -24,14 +24,3 @@ def critical_angle_equation(candy_radius, rod_length, rod_radius, angle):
         angle) ** 2
 
 
-c = critical_angle(3, 16, 1.3)
-
-rod_l = 50
-rod_r = 2.6
-
-candy_radii = range(10, 101, 1)
-for candy_r in candy_radii:
-    r = candy_r/10.0
-    a = critical_angle(r, rod_l, rod_r)
-    print(str(r) + " " + str(a)+"\\\\")
-
