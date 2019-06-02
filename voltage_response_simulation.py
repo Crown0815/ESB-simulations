@@ -26,7 +26,7 @@ rp = 0e-9                           # protein radius (defined below rps)
 # Environment constants
 epsilon_r = 78.49                   # relative permitivity of water at 20°C
 T = 298.15                          # Temperature [K]
-c = 0.06                           # salt concentration in [M]
+c = 0.06                            # salt concentration in [M]
 v = 1                               # salt valency
 
 # Simulation details
