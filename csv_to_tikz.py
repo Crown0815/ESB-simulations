@@ -6,9 +6,11 @@ path_origami_02_02V_g = '../Paper1_data/Data/Figure_3/OrigamiHybridization/-0.2-
 path_origami_01_03V_g = '../Paper1_data/Data/Figure_3/OrigamiHybridization/-0.1-0.3V/Functionalization/ch4e3a-20170329-095453.dyn'
 path_origami_0_04V_g = '../Paper1_data/Data/Figure_3/OrigamiHybridization/0-0.4V/Functionalization/ch4e3a-20170329-105020.dyn'
 
+path_trm_example = '../Paper1_data/Data/Figure_2/48mer_Switching/ch4e3b-20170330-081510.trm'
+
 path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/Regeneration w 6HB_anchor/Functionalization/ch2e3b-20170327-173741.dyn'
 
-with open(path_origami_03_01V_g, encoding='iso-8859-1') as csv_file:
+with open(path_trm_example, encoding='iso-8859-1') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
     line_count = 0
     for row in csv_reader:
@@ -16,6 +18,13 @@ with open(path_origami_03_01V_g, encoding='iso-8859-1') as csv_file:
             print(f'Column names are {", ".join(row)}')
             line_count += 1
         else:
-            print(f'{row[0]}\t\t{str(round(float(row[9])-float(row[10]),1))}\\\\')
+            # amplitude
+            # print(f'{row[0]}\t\t{str(round(float(row[9])-float(row[10]),1))}\\\\')
+
+            # upward motion after downward
+            print(f'{str(round(float(row[0])+0,2))}\t\t{row[3]}\\\\')
+
+            # raw
+            # print(f'{row[0]}\t\t{row[3]}\\\\')
             line_count += 1
     print(f'Processed {line_count} lines.')
