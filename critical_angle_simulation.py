@@ -24,3 +24,8 @@ def critical_angle_equation(candy_radius, rod_length, rod_radius, angle):
         angle) ** 2
 
 
+if __name__ == "__main__":
+    for radius in range(10, 101, 1):
+        print(str(radius/10) + "  " + str(critical_angle_degrees(radius/10, 100, 3.9)) + "\\\\")
+
+
