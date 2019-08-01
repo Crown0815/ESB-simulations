@@ -48,19 +48,18 @@ def ionic_strength(ion_valency, ion_concentration):
     return ion_valency ** 2 * ion_concentration / 0.1 ** 3          # 0.1 ** 3 is correction from liter to cubic meter
 
 
-def inverse_debye_length(ion_strength: float, temperature: float, relative_permitivity: float) -> object:
+def inverse_debye_length(ion_strength: float, temperature: float, relative_permitivity: float) -> float:
     return sqrt(2 * N_A * e ** 2 / (epsilon_0 * relative_permitivity * k_B * temperature) * ion_strength)
 
 
 kappa = inverse_debye_length(ionic_strength(v, c), T, epsilon_r)
-print("Debye length = "+str(1/kappa)+"m")
+print(f"Debye length = {1e9/kappa:.2f} nm")
 
 
 def orientation_probability(angle, potential, lever_length, lever_radius, line_charge_density):
-    return cos(angle) * exp(- potential * gamma * line_charge_density / (kappa * k_B * T) * (1 - exp(
+    return cos(angle) * exp(-potential * gamma * line_charge_density / (kappa * k_B * T) * (1 - exp(
                             -kappa * lever_length * sin(angle))) /
                             (exp(kappa * lever_radius * cos(angle)) * sin(angle)))
-
 
 def orientation_probability_normalization_factor(probabilities: iter):
     return sum(probabilities)
@@ -118,6 +117,14 @@ def inflection_point(fluorescence: dict) -> int:
 def inflection_point_slope(fluorescence: dict) -> int:
     diff_fluo = np.diff(list(fluorescence.values()))
     return diff_fluo.min()
+
+
+if __name__ == "__main__":
+    potentials = [-0.4 + 0.01 * x for x in range(0, 81, 1)]  # potential range
+    for potential in potentials:
+        probabilities = orientation_probabilities(potential, 0, 16e-9, r_dna, rho_dna)
+        for angle, probability in probabilities.items():
+            print(f'{potential:.2f}\t\t{angle/pi*180:.2f}\t\t{probability:.8f}\\\\')
 
 
 
