@@ -53,7 +53,52 @@ class VrmPrinter():
             print(f'{((f-min_fluorescence)/(max_fluorescence-min_fluorescence))}')
 
 
+class CsvAverage:
+    def __init__(self, encoding='iso-8859-1', delimiter=';'):
+        self.encoding = encoding
+        self.delimiter = delimiter
+        self.average = list()
+        self.sources = list()
+        self.line_count = None
+
+    def add_source(self, path: str):
+        with open(path, encoding=self.encoding) as file:
+            count = sum(1 for _ in csv.reader(file))
+
+        if self.line_count is None:
+            self.line_count = count
+        elif self.line_count != count:
+            raise Exception("Files must contain same number of lines")
+
+        self.sources.append(path)
+
+    def print(self, col1: int = 0, col2: int = 1):
+        files = [open(source, encoding=self.encoding) for source in self.sources]
+        readers = [csv.reader(file, delimiter=self.delimiter) for file in files]
+        iterators = [iter(reader) for reader in readers]
+
+        row_index = 0
+        while row_index < self.line_count:
+            rows = [next(iterator) for iterator in iterators]
+            if row_index == 0:
+                print(f'Column names are {rows[0][col1]} and {rows[0][col2]}')
+            else:
+                val1 = statistics.mean([float(row[col1]) for row in rows])
+                val2 = statistics.mean([float(row[col2]) for row in rows])
+                print(f'{val1:.2f}\t\t{val2}\\\\')
+            row_index += 1
+
+
 vrm_printer = VrmPrinter()
+csv_average = CsvAverage()
+
+# csv_average.add_source(path_4hb_trm_1)
+# csv_average.add_source(path_4hb_trm_2)
+# csv_average.add_source(path_4hb_trm_3)
+# csv_average.add_source(path_4hb_trm_4)
+
+# csv_average.print(0, 7)
+
 
 with open(path_6hb_vrr_4, encoding='iso-8859-1') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
