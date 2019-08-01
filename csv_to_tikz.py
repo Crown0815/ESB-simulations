@@ -13,17 +13,28 @@ path_4hb_vrr_3 = '../Origami_Paper2/TRM/4HB/ch1e2g-20180802-115801.vrr'
 path_4hb_vrr_4 = '../Origami_Paper2/TRM/4HB/ch1e1g-20180802-115801.vrr'
 path_4hb_vrm = '../Origami_Paper2/TRM/4HB/preparedVrmData.csv'
 
+path_4hb_trm_1 = '../Origami_Paper2/TRM/4HB/ch2e1a-20180808-182721.trm'
+path_4hb_trm_2 = '../Origami_Paper2/TRM/4HB/ch2e2a-20180808-182721.trm'
+path_4hb_trm_3 = '../Origami_Paper2/TRM/4HB/ch2e1a-20180808-212204.trm'
+path_4hb_trm_4 = '../Origami_Paper2/TRM/4HB/ch2e2a-20180808-212204.trm'
+
 path_6hb_vrr_1 = '../Paper1_data/Data/Figure_2/Origami Calibration/Calibration/ch4e3a-20170329-160745.vrr'
 path_6hb_vrr_2 = '../Paper1_data/Data/Figure_2/Origami Calibration/Calibration/ch4e4a-20170329-160745.vrr'
 path_6hb_vrr_3 = '../Paper1_data/Data/Figure_2/Origami Calibration/Calibration/ch4e5a-20170329-160745.vrr'
 path_6hb_vrr_4 = '../Paper1_data/Data/Figure_2/Origami Calibration/Calibration/ch4e6a-20170329-160745.vrr'
+
+path_6hb_trm_1 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e3a-20170329-171550.trm'
+path_6hb_trm_2 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e4a-20170329-171550.trm'
+path_6hb_trm_3 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e5a-20170329-171550.trm'
+path_6hb_trm_4 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e6a-20170329-171550.trm'
+
 
 path_trm_example = '../Paper1_data/Data/Figure_2/48mer_Switching/ch4e3b-20170330-081510.trm'
 
 path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/Regeneration w 6HB_anchor/Functionalization/ch2e3b-20170327-173741.dyn'
 
 
-class VrmPrinter():
+class VrmPrinter:
     def __init__(self):
         self.voltage = None
         self.fluorescence = list()
@@ -100,7 +111,7 @@ csv_average = CsvAverage()
 # csv_average.print(0, 7)
 
 
-with open(path_6hb_vrr_4, encoding='iso-8859-1') as csv_file:
+with open(path_4hb_trm_1, encoding='iso-8859-1') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
     line_count = 0
     for row in csv_reader:
@@ -112,17 +123,14 @@ with open(path_6hb_vrr_4, encoding='iso-8859-1') as csv_file:
             # print(f'{row[0]}\t\t{str(round(float(row[9])-float(row[10]),1))}\\\\')
 
             # upward motion after downward
-            # print(f'{str(round(float(row[0])+0,2))}\t\t{row[3]}\\\\')
+            # print(f'{float(row[0])-499.5:.2f}\t\t{row[2]}\\\\')
 
             # vrm
-            vrm_printer.add(float(row[1]), float(row[2]))
+            # vrm_printer.add(float(row[1]), float(row[2]))
 
             # raw
-            # print(f'{row[0]}\t\t{row[1]}\\\\')
+            print(f'{row[0]}\t\t{row[6]}\\\\')
 
             line_count += 1
-    vrm_printer.print_normalized()
+    # vrm_printer.print_normalized()
     print(f'Processed {line_count} lines.')
-
-
-
