@@ -115,8 +115,9 @@ csv_average = CsvAverage()
 
 with open(path_4hb_trm_1, encoding='iso-8859-1') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
+    rows = [row for row in csv_reader]
     line_count = 0
-    for row in csv_reader:
+    for row in rows:
         if line_count == 0:
             print(f'Column names are {", ".join(row)}')
             line_count += 1
