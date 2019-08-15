@@ -28,6 +28,26 @@ path_6hb_trm_2 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e4a-20170329
 path_6hb_trm_3 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e5a-20170329-171550.trm'
 path_6hb_trm_4 = '../Paper1_data/Data/Figure_2/Origami Switching/ch4e6a-20170329-171550.trm'
 
+path_48bp_trm_1 = '../Origami_Paper2/TRM/48bp/ch1e4g-20180829-170351.trm'
+path_48bp_trm_2 = '../Origami_Paper2/TRM/48bp/ch1e3g-20180829-170351.trm'
+path_48bp_trm_3 = '../Origami_Paper2/TRM/48bp/ch1e2g-20180829-170351.trm'
+path_48bp_trm_4 = '../Origami_Paper2/TRM/48bp/ch1e1g-20180829-170351.trm'
+
+path_48bp_vrr_1 = '../Paper1_data/Data/Figure_2/48mer Calibration/124618_Origami Buffer/ch1e3-20170410-124618.vrr'
+path_48bp_vrr_2 = '../Paper1_data/Data/Figure_2/48mer Calibration/124738_Origami Buffer/ch1e4-20170410-124738.vrr'
+path_48bp_vrr_3 = '../Paper1_data/Data/Figure_2/48mer Calibration/124908_Origami Buffer/ch1e5-20170410-124908.vrr'
+path_48bp_vrr_4 = '../Paper1_data/Data/Figure_2/48mer Calibration/125023_Origami Buffer/ch1e6-20170410-125023.vrr'
+
+path_96bp_trm_1 = '../Origami_Paper2/TRM/96bp/TRM_old/ch1e3a-20180816-153502.trm'
+path_96bp_trm_2 = '../Origami_Paper2/TRM/96bp/TRM_old/ch1e4a-20180816-153502.trm'
+path_96bp_trm_3 = '../Origami_Paper2/TRM/96bp/TRM_old/ch1e5a-20180816-153502.trm'
+path_96bp_trm_4 = '../Origami_Paper2/TRM/96bp/TRM_old/ch1e6a-20180816-153502.trm'
+
+path_96bp_vrr_1 = '../Origami_Paper2/TRM/96bp/ch1e3b-20180925-111215.vrr'
+path_96bp_vrr_2 = '../Origami_Paper2/TRM/96bp/ch1e4b-20180925-111215.vrr'
+path_96bp_vrr_3 = '../Origami_Paper2/TRM/96bp/ch1e5b-20180925-111215.vrr'
+path_96bp_vrr_4 = '../Origami_Paper2/TRM/96bp/ch1e6b-20180925-111215.vrr'
+
 
 path_trm_example = '../Paper1_data/Data/Figure_2/48mer_Switching/ch4e3b-20170330-081510.trm'
 
@@ -60,8 +80,8 @@ class VrmPrinter:
         max_fluorescence = self.fluorescences[0]
         min_fluorescence = self.fluorescences[-1]
         for v, f in zip(self.voltages, self.fluorescences):
-            # print(f'{v}\t\t{((f-min_fluorescence)/(max_fluorescence-min_fluorescence))}\\\\')
-            print(f'{((f-min_fluorescence)/(max_fluorescence-min_fluorescence))}')
+            print(f'{v}\t\t{((f-min_fluorescence)/(max_fluorescence-min_fluorescence))}\\\\')
+            # print(f'{((f-min_fluorescence)/(max_fluorescence-min_fluorescence))}')
 
 
 class CsvAverage:
@@ -113,7 +133,7 @@ csv_average = CsvAverage()
 # csv_average.print(0, 7)
 
 
-with open(path_4hb_trm_1, encoding='iso-8859-1') as csv_file:
+with open(path_48bp_vrr_4, encoding='iso-8859-1') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
     rows = [row for row in csv_reader]
     line_count = 0
@@ -126,14 +146,14 @@ with open(path_4hb_trm_1, encoding='iso-8859-1') as csv_file:
             # print(f'{row[0]}\t\t{str(round(float(row[9])-float(row[10]),1))}\\\\')
 
             # upward motion after downward
-            # print(f'{float(row[0])-499.5:.2f}\t\t{row[2]}\\\\')
+            # print(f'{float(row[0])-100:.2f}\t\t{row[2]}\\\\')
 
             # vrm
-            # vrm_printer.add(float(row[1]), float(row[2]))
+            vrm_printer.add(float(row[1]), float(row[2]))
 
             # raw
-            print(f'{row[0]}\t\t{row[6]}\\\\')
+            # print(f'{row[0]}\t\t{row[6]}\\\\')
 
             line_count += 1
-    # vrm_printer.print_normalized()
+    vrm_printer.print_normalized()
     print(f'Processed {line_count} lines.')
