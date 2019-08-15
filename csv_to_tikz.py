@@ -83,7 +83,7 @@ class CsvAverage:
 
         self.sources.append(path)
 
-    def print(self, col1: int = 0, col2: int = 1):
+    def print(self, col1: int = 0, col2: int = 1, x_offset: float = 0, show_column_names: bool = False):
         files = [open(source, encoding=self.encoding) for source in self.sources]
         readers = [csv.reader(file, delimiter=self.delimiter) for file in files]
         iterators = [iter(reader) for reader in readers]
@@ -92,22 +92,24 @@ class CsvAverage:
         while row_index < self.line_count:
             rows = [next(iterator) for iterator in iterators]
             if row_index == 0:
-                print(f'Column names are {rows[0][col1]} and {rows[0][col2]}')
+                if show_column_names:
+                    print(f'Column names are {rows[0][col1]} and {rows[0][col2]}')
             else:
                 val1 = statistics.mean([float(row[col1]) for row in rows])
                 val2 = statistics.mean([float(row[col2]) for row in rows])
-                print(f'{val1:.2f}\t\t{val2}\\\\')
+                print(f'{val1+x_offset:.2f}\t\t{val2:.4f}\\\\')
             row_index += 1
 
 
 vrm_printer = VrmPrinter()
 csv_average = CsvAverage()
 
-# csv_average.add_source(path_4hb_trm_1)
-# csv_average.add_source(path_4hb_trm_2)
-# csv_average.add_source(path_4hb_trm_3)
-# csv_average.add_source(path_4hb_trm_4)
+# csv_average.add_source(path_96bp_trm_1)
+# csv_average.add_source(path_96bp_trm_2)
+# csv_average.add_source(path_96bp_trm_3)
+# csv_average.add_source(path_96bp_trm_4)
 
+# csv_average.print(0, 3, -100, True)
 # csv_average.print(0, 7)
 
 
