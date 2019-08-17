@@ -94,12 +94,15 @@ class SimpleCsv:
             if show_read_line_count:
                 print(f'Read {len(self.rows)} lines.')
 
-    def print(self, col1: int=0, col2: int=1, x_offset: float=0, show_column_names: bool=False):
+    def print(self, col1: int=0, col2: int=1, x_offset: float=0, row_separator: str="", print_every_nth: int=1, show_column_names: bool=False):
             line_count = 0
             for row in self.rows:
                 if line_count == 0:
                     if show_column_names:
                         print(f'Column names are {", ".join(row)}')
+                elif line_count % print_every_nth != 0:
+                    line_count += 1
+                    continue
                 else:
-                    print(f'{float(row[col1])-x_offset}\t\t{row[col2]}\\\\')
+                    print(f'{float(row[col1])+x_offset:.2f}\t\t{row[col2]}{row_separator}')
                 line_count += 1
