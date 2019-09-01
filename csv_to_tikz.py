@@ -19,6 +19,11 @@ path_4hb_vrr_3 = '../Origami_Paper2/TRM/4HB/ch1e2g-20180802-115801.vrr'
 path_4hb_vrr_4 = '../Origami_Paper2/TRM/4HB/ch1e1g-20180802-115801.vrr'
 path_4hb_vrm = '../Origami_Paper2/TRM/4HB/preparedVrmData.csv'
 
+path_4hb_vrm_lukas_1 = '../Origami_Paper2/AdditionalDataLukas/4HB/Id0_AH315_20x_SF_-0.4+0.1V_0.5k.dat'
+path_4hb_vrm_lukas_2 = '../Origami_Paper2/AdditionalDataLukas/4HB/Id1_AH315_20x_SF_-0.4+0.1V_0.5k.dat'
+path_4hb_vrm_lukas_3 = '../Origami_Paper2/AdditionalDataLukas/4HB/Id2_AH315_20x_SF_-0.4+0.1V_0.5k.dat'
+path_4hb_vrm_lukas_4 = '../Origami_Paper2/AdditionalDataLukas/4HB/Id3_AH315_20x_SF_-0.4+0.1V_0.5k.dat'
+
 path_4hb_trm_1 = '../Origami_Paper2/TRM/4HB/ch2e1a-20180808-182721.trm'
 path_4hb_trm_2 = '../Origami_Paper2/TRM/4HB/ch2e2a-20180808-182721.trm'
 path_4hb_trm_3 = '../Origami_Paper2/TRM/4HB/ch2e1a-20180808-212204.trm'
@@ -70,32 +75,29 @@ path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/
 
 
 # vrm_printer = VrmPrinter()
-# csv_average = CsvAverage()
+csv_average = CsvAverage()
 
-# csv_average.add_source(path_96bp_trm_1)
-# csv_average.add_source(path_96bp_trm_2)
-# csv_average.add_source(path_96bp_trm_3)
-# csv_average.add_source(path_96bp_trm_4)
+csv_average.add_source(path_4hb_vrm_lukas_1)
+csv_average.add_source(path_4hb_vrm_lukas_2)
+csv_average.add_source(path_4hb_vrm_lukas_3)
+csv_average.add_source(path_4hb_vrm_lukas_4)
 
-# csv_average.print(0, 3, -100, True)
+csv_average.print(0, 3)
 # csv_average.print(0, 7)
 
 reader = SimpleCsv()
 
-paths = paths_6hb_mg_tit
-for index, path in enumerate(paths, start=1):
-    if index % 2 == 0:
-        continue
-    reader.read(path)
-    color = "mycolor1!"+str(100*index/len(paths))+"!mycolor2"
-    print('\\addplot [color='+color+'] table{%')
-    reader.print(TRM_TIME, TRM_DOWN_SMOOTH, -4995)
-    reader.print(TRM_TIME, TRM_UP_SMOOTH)
-    print("};\n")
+# path = path_4hb_vrm_lukas_4
+# reader.read(path)
+# reader.print(0, 3)
 
-
-
-
-
-
-
+# paths = paths_6hb_mg_tit
+# for index, path in enumerate(paths, start=1):
+#     if index % 2 == 0:
+#         continue
+#     reader.read(path)
+#     color = "mycolor1!"+str(100*index/len(paths))+"!mycolor2"
+#     print('\\addplot [color='+color+'] table{%')
+#     reader.print(TRM_TIME, TRM_DOWN_SMOOTH, -4995)
+#     reader.print(TRM_TIME, TRM_UP_SMOOTH)
+#     print("};\n")
