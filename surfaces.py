@@ -3,8 +3,6 @@ from math import *
 from statistics import *
 import random
 import matplotlib.pyplot as plt
-import numpy as np
-import scipy.spatial as sp
 
 
 class Hexagon:
@@ -12,11 +10,11 @@ class Hexagon:
 
     @staticmethod
     def area_from_outer(outer_radius: float):
-        return 3 * sqrt(3) / 2 * outer_radius ** 2
+        return Hexagon.area_from_inner(outer_radius * Hexagon.outer_to_inner_factor)
 
     @staticmethod
     def area_from_inner(inner_radius: float):
-        return Hexagon.area_from_outer(inner_radius / Hexagon.outer_to_inner_factor)
+        return 3 * sqrt(3) / 2 * inner_radius ** 2
 
     @staticmethod
     def outer_to_inner(outer_hexagon_radius):
@@ -46,7 +44,7 @@ class HexagonalGrid:
         return Hexagon.area_from_outer(self.unit)
 
     def max_x_index(self, max_value):
-        return floor(max_value / self.unit * 1.5)
+        return floor(max_value / (self.unit * 1.5))
 
     def max_y_index(self, max_value):
         return floor(max_value / (2 * Hexagon.outer_to_inner(self.unit)))
@@ -66,6 +64,19 @@ class Coordinate:
     def default():
         return Coordinate(0, 0, 0, 0)
 
+    def closest_neighbor(self, coordinates):
+        distance = float('inf')
+        closest = None
+        for coordinate in coordinates:
+            d = self.distance_to(coordinate)
+            if d == 0 or d > distance:
+                continue
+
+            closest = coordinate
+            distance = d
+
+        return closest
+
     def print(self):
         print(f"Index ({self.x_index}, {self.y_index}) at ({self.x}, {self.y})")
 
@@ -74,21 +85,28 @@ class RandomSurface:
     def __init__(self, layout: HexagonalGrid):
         self.grid = layout
 
-    def create_for_size(self, x_max: float, y_max: float, average_distance: float, lever_length: float = 16e-9):
-
-        probability = self.grid.unit_area() / Hexagon.area_from_inner(average_distance / 2)
-        levers = list()
+    def positions_for_size(self, x_max: float, y_max: float, average_distance: float):
+        probability = self.grid.unit_area() / Hexagon.area_from_inner(average_distance)
         for index in self.get_indices(x_max, y_max):
-            if random.random() > probability:
-                continue
-            coordinate = self.grid.get_coordinate(index[0], index[1])
-            levers.append(NanoLever(coordinate, lever_length))
-        return levers
+            if random.random() < probability:
+                yield self.grid.get_coordinate(index[0], index[1])
+
+    def nanolevers_for_size(self, x_max: float, y_max: float, average_distance: float, lever_length: float = 16e-9):
+        for position in self.positions_for_size(x_max, y_max, average_distance):
+            yield NanoLever(position, lever_length)
 
     def get_indices(self, x_max: float, y_max: float):
         x_indices = range(self.grid.max_x_index(x_max) + 1)
         y_indices = range(self.grid.max_y_index(y_max) + 1)
         return [(x, y) for x in x_indices for y in y_indices]
+
+    @staticmethod
+    def average_distance_to_closest_neighbor(coordinates):
+        closest_neighbor_distance = list()
+        for coordinate in coordinates:
+            neighbor = coordinate.closest_neighbor(coordinates)
+            closest_neighbor_distance.append(coordinate.distance_to(neighbor))
+        return mean(closest_neighbor_distance)
 
 
 class NanoLever:
@@ -105,30 +123,27 @@ class InterLinker:
 
     def analyze_nearest_neighbors(self):
         result = dict()
+        min_distances = list()
         for nano_lever in self.nano_levers:
             position = nano_lever.position
             distances = [position.distance_to(c) for c in self.coordinates]
             distances.remove(0.0)
             minimum = min(distances)
+            min_distances.append(minimum)
+            print(minimum)
             index = distances.index(minimum)
             result[nano_lever] = self.nano_levers[index]
 
+        print(mean(min_distances))
         return result
 
 
 if __name__ == '__main__':
-    grid = HexagonalGrid()
+    grid = HexagonalGrid(2.5)
     surface = RandomSurface(grid)
-    levers = surface.create_for_size(1000, 1000, 50, 16)
-    linker = InterLinker(levers)
-
-    pairs = linker.nearest_neighbors
-    distances = [source.position.distance_to(pairs[source].position) for source in pairs]
-    print(f"average distance = {mean(distances)}")
-
-    print(linker.nearest_neighbors)
+    levers = list(surface.nanolevers_for_size(1000, 1000, 60, 16))
 
     x_values = list(l.position.x for l in levers)
     y_values = list(l.position.y for l in levers)
     plt.plot(x_values, y_values, 'o')
-    # plt.show()
+    plt.show()
