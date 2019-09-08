@@ -1,5 +1,7 @@
 from csv_reader import *
 from glob import glob
+import matplotlib.pyplot as plt
+from scipy.signal import savgol_filter
 
 TRM_TIME = 0
 TRM_DOWN_NORM = 2
@@ -77,12 +79,17 @@ path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/
 # vrm_printer = VrmPrinter()
 csv_average = CsvAverage()
 
-csv_average.add_source(path_4hb_vrm_lukas_1)
-csv_average.add_source(path_4hb_vrm_lukas_2)
-csv_average.add_source(path_4hb_vrm_lukas_3)
-csv_average.add_source(path_4hb_vrm_lukas_4)
+csv_average.add_source(path_6hb_trm_1)
+csv_average.add_source(path_6hb_trm_2)
+csv_average.add_source(path_6hb_trm_3)
+csv_average.add_source(path_6hb_trm_4)
 
-csv_average.print(0, 3)
+# csv_average.print(0, 3)
+x = list(csv_average.values(TRM_TIME, True))
+y = list(csv_average.values(TRM_UP_NORM, True))
+
+y_smooth = savgol_filter(y, 11, 5)
+SimpleTikZPrinter.print(x, y_smooth)
 # csv_average.print(0, 7)
 
 reader = SimpleCsv()
