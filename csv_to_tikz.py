@@ -79,20 +79,20 @@ path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/
 # vrm_printer = VrmPrinter()
 csv_average = CsvAverage()
 
-csv_average.add_source(path_6hb_trm_1)
-csv_average.add_source(path_6hb_trm_2)
-csv_average.add_source(path_6hb_trm_3)
-csv_average.add_source(path_6hb_trm_4)
+csv_average.add_source(path_4hb_trm_1)
+csv_average.add_source(path_4hb_trm_2)
+csv_average.add_source(path_4hb_trm_3)
+csv_average.add_source(path_4hb_trm_4)
 
 # csv_average.print(0, 3)
-x = list(csv_average.values(TRM_TIME, True))
-y = list(csv_average.values(TRM_UP_NORM, True))
+x = list(csv_average.values(TRM_TIME, -499.5)) + list(csv_average.values(TRM_TIME))
+y = list(csv_average.values(TRM_DOWN_NORM)) + list(csv_average.values(TRM_UP_NORM))
 
 y_smooth = savgol_filter(y, 11, 5)
 SimpleTikZPrinter.print(x, y_smooth)
 # csv_average.print(0, 7)
 
-reader = SimpleCsv()
+# reader = SimpleCsv()
 
 # path = path_4hb_vrm_lukas_4
 # reader.read(path)

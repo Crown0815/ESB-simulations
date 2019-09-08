@@ -81,7 +81,7 @@ class CsvAverage:
                 print(f'{val1+x_offset:.2f}\t\t{val2:.4f}\\\\')
             row_index += 1
 
-    def values(self, col: int = 0, has_header: bool = False):
+    def values(self, col: int = 0, offset: float=0, has_header: bool = True):
         files = [open(source, encoding=self.encoding) for source in self.sources]
         readers = [csv.reader(file, delimiter=self.delimiter) for file in files]
         iterators = [iter(reader) for reader in readers]
@@ -90,7 +90,7 @@ class CsvAverage:
         while row_index < self.line_count:
             rows = [next(iterator) for iterator in iterators]
             if row_index > 0 or not has_header:
-                yield statistics.mean([float(row[col]) for row in rows])
+                yield statistics.mean([float(row[col]) for row in rows]) + offset
             row_index += 1
 
 
