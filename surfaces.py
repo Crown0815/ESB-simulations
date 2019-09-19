@@ -10,11 +10,11 @@ class Hexagon:
 
     @staticmethod
     def area_from_outer(outer_radius: float):
-        return Hexagon.area_from_inner(outer_radius * Hexagon.outer_to_inner_factor)
+        return Hexagon.area_from_inner(Hexagon.outer_to_inner(outer_radius))
 
     @staticmethod
     def area_from_inner(inner_radius: float):
-        return 3 * sqrt(3) / 2 * inner_radius ** 2
+        return 2 * sqrt(3) * inner_radius ** 2
 
     @staticmethod
     def outer_to_inner(outer_hexagon_radius):
@@ -46,8 +46,14 @@ class HexagonalGrid:
     def max_x_index(self, max_value):
         return floor(max_value / (self.unit * 1.5))
 
+    def min_x_index(self, min_value):
+        return ceil(min_value / (self.unit * 1.5))
+
     def max_y_index(self, max_value):
         return floor(max_value / (2 * Hexagon.outer_to_inner(self.unit)))
+
+    def min_y_index(self, min_value):
+        return ceil(min_value / (2 * Hexagon.outer_to_inner(self.unit)))
 
 
 class Coordinate:
@@ -84,29 +90,60 @@ class Coordinate:
 class RandomSurface:
     def __init__(self, layout: HexagonalGrid):
         self.grid = layout
+        self.padding_factor = 10
+        self.coordinates_with_padding = list()
+        self.coordinates = list()
 
-    def positions_for_size(self, x_max: float, y_max: float, average_distance: float):
-        probability = self.grid.unit_area() / Hexagon.area_from_inner(average_distance)
-        for index in self.get_indices(x_max, y_max):
-            if random.random() < probability:
-                yield self.grid.get_coordinate(index[0], index[1])
+    def initialize(self, x_max: float, y_max: float, average_distance: float):
+        probability = self.probability(average_distance)
+        indices = self.get_padded_indices(x_max, y_max, average_distance)
 
-    def nanolevers_for_size(self, x_max: float, y_max: float, average_distance: float, lever_length: float = 16e-9):
-        for position in self.positions_for_size(x_max, y_max, average_distance):
-            yield NanoLever(position, lever_length)
+        self.coordinates_with_padding = list()
+        self.coordinates = list()
 
-    def get_indices(self, x_max: float, y_max: float):
-        x_indices = range(self.grid.max_x_index(x_max) + 1)
-        y_indices = range(self.grid.max_y_index(y_max) + 1)
+        for index in indices:
+            if random.uniform(0, 1) >= probability: continue
+
+            coordinate = self.grid.get_coordinate(index[0], index[1])
+            self.coordinates_with_padding.append(coordinate)
+            if coordinate.x < 0 or coordinate.x > x_max: continue
+            if coordinate.y < 0 or coordinate.y > y_max: continue
+
+            self.coordinates.append(coordinate)
+
+        print("Goal probability: "+str(probability)+" real: "+str(len(self.coordinates_with_padding)/len(indices)))
+
+    def probability(self, average_distance: float):
+        return self.grid.unit_area() / Hexagon.area_from_inner(average_distance)
+
+    def padding_distance(self, average_distance: float):
+        return self.padding_factor * average_distance
+
+    def get_padded_indices(self, x_max: float, y_max: float, average_distance: float, x_min: float = 0, y_min:float = 0):
+        padding = self.padding_distance(average_distance)
+        return self.get_indices(x_min - padding, x_max + padding, y_min - padding, y_max + padding)
+
+    def get_indices(self, x_min: float, x_max: float, y_min: float, y_max: float):
+        x_indices = range(self.grid.min_x_index(x_min), self.grid.max_x_index(x_max) + 1)
+        y_indices = range(self.grid.min_y_index(y_min), self.grid.max_y_index(y_max) + 1)
         return [(x, y) for x in x_indices for y in y_indices]
 
-    @staticmethod
-    def average_distance_to_closest_neighbor(coordinates):
+    def average_distance_to_closest_neighbor(self):
         closest_neighbor_distance = list()
-        for coordinate in coordinates:
-            neighbor = coordinate.closest_neighbor(coordinates)
+
+        for coordinate in self.coordinates:
+            neighbor = coordinate.closest_neighbor(self.coordinates_with_padding)
             closest_neighbor_distance.append(coordinate.distance_to(neighbor))
         return mean(closest_neighbor_distance)
+
+    @staticmethod
+    def coordinates_within(coordinates, x_min: float = 0, x_max: float = 0, y_min: float = 0, y_max: float = 0):
+        for coordinate in coordinates:
+            if coordinate.x < x_min: continue
+            if coordinate.x > x_max: continue
+            if coordinate.y < y_min: continue
+            if coordinate.y > y_max: continue
+            yield coordinate
 
 
 class NanoLever:
@@ -141,7 +178,7 @@ class InterLinker:
 if __name__ == '__main__':
     grid = HexagonalGrid(2.5)
     surface = RandomSurface(grid)
-    levers = list(surface.nanolevers_for_size(1000, 1000, 60, 16))
+    levers = list(surface.nano_levers_for_size(1000, 1000, 60, 16))
 
     x_values = list(l.position.x for l in levers)
     y_values = list(l.position.y for l in levers)

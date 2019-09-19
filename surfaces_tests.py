@@ -33,27 +33,46 @@ class HexagonalGridTests(unittest.TestCase):
 class HexagonTests(unittest.TestCase):
 
     def test_area_from_inner(self):
-        inners = [1, 2, 5, 10, 20, 50, 100]
+        outers = [1, 2, 5, 10, 20, 50, 100]
         areas = [2.60, 10.39, 64.95, 259.81, 1039.23, 6495.19, 25980.76]
 
-        for inner, area in zip(inners, areas):
-            self.assertAlmostEqual(Hexagon.area_from_inner(inner), area, 2)
+        for outer, area in zip(outers, areas):
+            self.assertAlmostEqual(Hexagon.area_from_outer(outer), area, 2)
 
 
 class RandomSurfaceTests(unittest.TestCase):
 
     @staticmethod
-    def create_test_instance():
-        grid = HexagonalGrid(1)
+    def create_test_instance(grid_distance: int = 5):
+        grid = HexagonalGrid(grid_distance)
         return RandomSurface(grid)
 
-    def test_positions_for_size(self):
-        instance = self.create_test_instance()
-        distance = 50
+    def test_probability(self):
+        instance = self.create_test_instance(5)
+        self.assertAlmostEqual(instance.probability(5), 1.0, 1)
+        self.assertAlmostEqual(instance.probability(10), 0.25, 2)
+        self.assertAlmostEqual(instance.probability(15), 0.11, 2)
+        self.assertAlmostEqual(instance.probability(20), 0.0625, 4)
+        self.assertAlmostEqual(instance.probability(30), 0.02777, 4)
+        self.assertAlmostEqual(instance.probability(50), 0.01, 2)
+        self.assertAlmostEqual(instance.probability(100), 0.0025, 4)
 
-        runs = 10
+    def test_distribution_for_different_distances(self):
+        self.test_positions_for_size(20)
+        self.test_positions_for_size(30)
+        self.test_positions_for_size(50)
+
+    def test_positions_for_size(self, distance: int, runs: int = 1):
         while runs > 0:
-            positions = list(instance.positions_for_size(2000, 1000, distance))
-            print(len(positions))
-            self.assertAlmostEqual(instance.average_distance_to_closest_neighbor(positions), distance, delta=distance * 0.1)
+            instance = self.create_test_instance()
+            instance.initialize(1000, 1000, distance)
+            self.assertAlmostEqual(instance.average_distance_to_closest_neighbor(), distance, delta=distance * 0.1)
             runs -= 1
+
+    def test_initialize_coordinates_are_subset_of_padded_coordinates(self):
+        instance = self.create_test_instance()
+        instance.initialize(1000, 1000, 50)
+
+        self.assertTrue(set(instance.coordinates).issubset(set(instance.coordinates_with_padding)))
+        self.assertEqual(len(set(instance.coordinates)), len(instance.coordinates))
+        self.assertEqual(len(set(instance.coordinates_with_padding)), len(instance.coordinates_with_padding))
