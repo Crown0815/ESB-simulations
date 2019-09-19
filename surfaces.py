@@ -90,7 +90,7 @@ class Coordinate:
 class RandomSurface:
     def __init__(self, layout: HexagonalGrid):
         self.grid = layout
-        self.padding_factor = 10
+        self.padding_factor = 3
         self.coordinates_with_padding = list()
         self.coordinates = list()
 
@@ -98,20 +98,35 @@ class RandomSurface:
         probability = self.probability(average_distance)
         indices = self.get_padded_indices(x_max, y_max, average_distance)
 
-        self.coordinates_with_padding = list()
-        self.coordinates = list()
+        coordinates = list()
+        random.shuffle(indices)
 
-        for index in indices:
-            if random.uniform(0, 1) >= probability: continue
+        number_of_coordinates = int(len(indices) * probability)
 
-            coordinate = self.grid.get_coordinate(index[0], index[1])
-            self.coordinates_with_padding.append(coordinate)
-            if coordinate.x < 0 or coordinate.x > x_max: continue
-            if coordinate.y < 0 or coordinate.y > y_max: continue
+        for _ in range(number_of_coordinates):
+            index = indices.pop(0)
+            coordinates.append(self.grid.get_coordinate(index[0], index[1]))
 
-            self.coordinates.append(coordinate)
+        inner_coordinates = list(self.coordinates_within(coordinates, 0, x_max, 0, y_max))
+        deviation = abs(self.average_distance(inner_coordinates, coordinates) / average_distance - 1)
+        while deviation > 0.1:
+            random.shuffle(indices)
+            number_of_replacements_per_run = int(number_of_coordinates * deviation)
+            for _ in range(number_of_replacements_per_run):
+                old = coordinates.pop(0)
+                indices.append((old.x_index, old.y_index))
+                index = indices.pop(0)
+                new = self.grid.get_coordinate(index[0], index[1])
+                coordinates.append(new)
+            print("Moved " + str(number_of_replacements_per_run) + " coordinates due to deviation of " + str(deviation))
 
-        print("Goal probability: "+str(probability)+" real: "+str(len(self.coordinates_with_padding)/len(indices)))
+            inner_coordinates = list(self.coordinates_within(coordinates, 0, x_max, 0, y_max))
+            if len(inner_coordinates) == 0:
+                continue
+            deviation = abs(self.average_distance(inner_coordinates, coordinates) / average_distance - 1)
+
+        self.coordinates_with_padding = coordinates
+        self.coordinates = inner_coordinates
 
     def probability(self, average_distance: float):
         return self.grid.unit_area() / Hexagon.area_from_inner(average_distance)
@@ -129,10 +144,14 @@ class RandomSurface:
         return [(x, y) for x in x_indices for y in y_indices]
 
     def average_distance_to_closest_neighbor(self):
+        return self.average_distance(self.coordinates, self.coordinates_with_padding)
+
+    @staticmethod
+    def average_distance(coordinates, neighbors):
         closest_neighbor_distance = list()
 
-        for coordinate in self.coordinates:
-            neighbor = coordinate.closest_neighbor(self.coordinates_with_padding)
+        for coordinate in coordinates:
+            neighbor = coordinate.closest_neighbor(neighbors)
             closest_neighbor_distance.append(coordinate.distance_to(neighbor))
         return mean(closest_neighbor_distance)
 

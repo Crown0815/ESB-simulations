@@ -61,11 +61,13 @@ class RandomSurfaceTests(unittest.TestCase):
         self.test_positions_for_size(20)
         self.test_positions_for_size(30)
         self.test_positions_for_size(50)
+        self.test_positions_for_size(100)
+        self.test_positions_for_size(200)
 
     def test_positions_for_size(self, distance: int, runs: int = 1):
         while runs > 0:
             instance = self.create_test_instance()
-            instance.initialize(1000, 1000, distance)
+            instance.initialize(500, 500, distance)
             self.assertAlmostEqual(instance.average_distance_to_closest_neighbor(), distance, delta=distance * 0.1)
             runs -= 1
 
