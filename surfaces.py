@@ -95,38 +95,54 @@ class RandomSurface:
         self.coordinates = list()
 
     def initialize(self, x_max: float, y_max: float, average_distance: float):
-        probability = self.probability(average_distance)
         indices = self.get_padded_indices(x_max, y_max, average_distance)
+        number_of_coordinates = int(len(indices) * self.probability(average_distance))
 
-        coordinates = list()
         random.shuffle(indices)
+        coordinates = list(self.coordinates_from(indices, number_of_coordinates))
+        self.coordinates_with_padding, self.coordinates = self.optimize_coordinates(indices, coordinates, x_max, y_max, average_distance)
 
-        number_of_coordinates = int(len(indices) * probability)
-
-        for _ in range(number_of_coordinates):
-            index = indices.pop(0)
-            coordinates.append(self.grid.get_coordinate(index[0], index[1]))
-
-        inner_coordinates = list(self.coordinates_within(coordinates, 0, x_max, 0, y_max))
-        deviation = abs(self.average_distance(inner_coordinates, coordinates) / average_distance - 1)
-        while deviation > 0.1:
-            random.shuffle(indices)
-            number_of_replacements_per_run = int(number_of_coordinates * deviation)
-            for _ in range(number_of_replacements_per_run):
-                old = coordinates.pop(0)
-                indices.append((old.x_index, old.y_index))
-                index = indices.pop(0)
-                new = self.grid.get_coordinate(index[0], index[1])
-                coordinates.append(new)
-            print("Moved " + str(number_of_replacements_per_run) + " coordinates due to deviation of " + str(deviation))
-
+    def optimize_coordinates(self, indices, coordinates, x_max: float, y_max: float, expected_distance: float):
+        while True:
             inner_coordinates = list(self.coordinates_within(coordinates, 0, x_max, 0, y_max))
             if len(inner_coordinates) == 0:
+                print("Shuffle coordinates because all were positioned in padding")
+                coordinates, indices = self.shuffle_coordinates(indices, coordinates, 0.5)
                 continue
-            deviation = abs(self.average_distance(inner_coordinates, coordinates) / average_distance - 1)
 
-        self.coordinates_with_padding = coordinates
-        self.coordinates = inner_coordinates
+            print("requesting average distance for " + str(len(inner_coordinates)) + " inner_coordinates")
+            deviation = abs(self.average_distance(inner_coordinates, coordinates) / expected_distance - 1)
+            if deviation > 0.05:
+                print("Shuffle coordinates due to deviation of " + str(deviation))
+                coordinates, indices = self.shuffle_coordinates(indices, coordinates, deviation)
+                continue
+            break
+
+        print("Optimized coordinates to deviation of " + str(deviation))
+        return coordinates, inner_coordinates
+
+    def shuffle_coordinates(self, indices, coordinates, relative_amount):
+
+        random.shuffle(indices)
+        count = int(len(coordinates) * relative_amount)
+        for _ in range(count):
+            coordinates, indices = self.reposition_coordinate(coordinates, indices)
+
+        print("Shuffled " + str(count) + " coordinates")
+        return coordinates, indices
+
+    def reposition_coordinate(self, coordinates, indices):
+        old = coordinates.pop(0)
+        indices.append((old.x_index, old.y_index))
+        index = indices.pop(0)
+        new = self.grid.get_coordinate(index[0], index[1])
+        coordinates.append(new)
+        return coordinates, indices
+
+    def coordinates_from(self, indices, count: int):
+        for _ in range(count):
+            index = indices.pop(0)
+            yield self.grid.get_coordinate(index[0], index[1])
 
     def probability(self, average_distance: float):
         return self.grid.unit_area() / Hexagon.area_from_inner(average_distance)
@@ -150,6 +166,7 @@ class RandomSurface:
     def average_distance(coordinates, neighbors):
         closest_neighbor_distance = list()
 
+        print("calculating average distance for " + str(len(coordinates)) + " coordinates")
         for coordinate in coordinates:
             neighbor = coordinate.closest_neighbor(neighbors)
             closest_neighbor_distance.append(coordinate.distance_to(neighbor))

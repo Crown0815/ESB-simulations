@@ -64,11 +64,11 @@ class RandomSurfaceTests(unittest.TestCase):
         self.test_positions_for_size(100)
         self.test_positions_for_size(200)
 
-    def test_positions_for_size(self, distance: int, runs: int = 1):
+    def test_positions_for_size(self, distance: int, runs: int = 10):
+        instance = self.create_test_instance()
         while runs > 0:
-            instance = self.create_test_instance()
             instance.initialize(500, 500, distance)
-            self.assertAlmostEqual(instance.average_distance_to_closest_neighbor(), distance, delta=distance * 0.1)
+            self.assertAlmostEqual(instance.average_distance_to_closest_neighbor(), distance, delta=distance * 0.05)
             runs -= 1
 
     def test_initialize_coordinates_are_subset_of_padded_coordinates(self):
