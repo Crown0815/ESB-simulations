@@ -43,6 +43,9 @@ class HexagonalGrid:
     def unit_area(self):
         return Hexagon.area_from_outer(self.unit)
 
+    def probability_of_distance(self, distance):
+        return self.unit_area() / Hexagon.area_from_inner(distance)
+
     def max_x_index(self, max_value):
         return floor(max_value / (self.unit * 1.5))
 
@@ -88,14 +91,14 @@ class Coordinate:
 
 
 class RandomSurface:
-    def __init__(self, layout: HexagonalGrid):
+    def __init__(self, layout: HexagonalGrid, padding_factory: int=3):
         self.grid = layout
-        self.padding_factor = 3
+        self.padding_factor = padding_factory
         self.coordinates_with_padding = list()
         self.coordinates = list()
 
     def initialize(self, x_max: float, y_max: float, average_distance: float):
-        indices = self.get_padded_indices(x_max, y_max, average_distance)
+        indices = self.padded_indices(x_max, y_max, average_distance)
         number_of_coordinates = int(len(indices) * self.probability(average_distance))
 
         random.shuffle(indices)
@@ -145,16 +148,16 @@ class RandomSurface:
             yield self.grid.get_coordinate(index[0], index[1])
 
     def probability(self, average_distance: float):
-        return self.grid.unit_area() / Hexagon.area_from_inner(average_distance)
+        return self.grid.probability_of_distance(average_distance)
 
     def padding_distance(self, average_distance: float):
         return self.padding_factor * average_distance
 
-    def get_padded_indices(self, x_max: float, y_max: float, average_distance: float, x_min: float = 0, y_min:float = 0):
+    def padded_indices(self, x_max: float, y_max: float, average_distance: float, x_min: float = 0, y_min: float = 0):
         padding = self.padding_distance(average_distance)
-        return self.get_indices(x_min - padding, x_max + padding, y_min - padding, y_max + padding)
+        return self.indices_within(x_min - padding, x_max + padding, y_min - padding, y_max + padding)
 
-    def get_indices(self, x_min: float, x_max: float, y_min: float, y_max: float):
+    def indices_within(self, x_min: float, x_max: float, y_min: float, y_max: float):
         x_indices = range(self.grid.min_x_index(x_min), self.grid.max_x_index(x_max) + 1)
         y_indices = range(self.grid.min_y_index(y_min), self.grid.max_y_index(y_max) + 1)
         return [(x, y) for x in x_indices for y in y_indices]
@@ -182,41 +185,15 @@ class RandomSurface:
             yield coordinate
 
 
-class NanoLever:
-    def __init__(self, position: Coordinate = Coordinate.default(), length: float = 16e-9):
-        self.length = length
-        self.position = position
-
-
-class InterLinker:
-    def __init__(self, nano_levers):
-        self.nano_levers = nano_levers
-        self.coordinates = [l.position for l in self.nano_levers]
-        self.nearest_neighbors = self.analyze_nearest_neighbors()
-
-    def analyze_nearest_neighbors(self):
-        result = dict()
-        min_distances = list()
-        for nano_lever in self.nano_levers:
-            position = nano_lever.position
-            distances = [position.distance_to(c) for c in self.coordinates]
-            distances.remove(0.0)
-            minimum = min(distances)
-            min_distances.append(minimum)
-            print(minimum)
-            index = distances.index(minimum)
-            result[nano_lever] = self.nano_levers[index]
-
-        print(mean(min_distances))
-        return result
-
-
 if __name__ == '__main__':
     grid = HexagonalGrid(2.5)
     surface = RandomSurface(grid)
-    levers = list(surface.nano_levers_for_size(1000, 1000, 60, 16))
+    surface.initialize(2000, 2000, 60)
 
-    x_values = list(l.position.x for l in levers)
-    y_values = list(l.position.y for l in levers)
+    x_values = list(c.x for c in surface.coordinates)
+    y_values = list(c.y for c in surface.coordinates)
     plt.plot(x_values, y_values, 'o')
+    x_values = list(c.x for c in surface.coordinates_with_padding if c not in surface.coordinates)
+    y_values = list(c.y for c in surface.coordinates_with_padding if c not in surface.coordinates)
+    plt.plot(x_values, y_values, 'x')
     plt.show()
