@@ -1,5 +1,5 @@
 import unittest
-from surfaces import HexagonalGrid, Hexagon, RandomSurface
+from surfaces import HexagonalGrid, Hexagon, RandomSurface, Coordinate
 
 
 class HexagonalGridTests(unittest.TestCase):
@@ -78,3 +78,15 @@ class RandomSurfaceTests(unittest.TestCase):
         self.assertTrue(set(instance.coordinates).issubset(set(instance.coordinates_with_padding)))
         self.assertEqual(len(set(instance.coordinates)), len(instance.coordinates))
         self.assertEqual(len(set(instance.coordinates_with_padding)), len(instance.coordinates_with_padding))
+
+
+class CoordinateTests(unittest.TestCase):
+    @staticmethod
+    def create_test_instance(x: float, y: float, x_index: int = 0, y_index: int = 0):
+        return Coordinate(x, y, x_index, y_index)
+
+    def test_equality(self):
+        instance = self.create_test_instance(1, 1)
+        other = self.create_test_instance(1, 1)
+
+        self.assertEqual(instance, other)

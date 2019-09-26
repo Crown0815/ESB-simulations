@@ -89,6 +89,13 @@ class Coordinate:
     def print(self):
         print(f"Index ({self.x_index}, {self.y_index}) at ({self.x}, {self.y})")
 
+    def __eq__(self, other):
+        if self.x != other.x: return False
+        if self.y != other.y: return False
+        if self.x_index != other.x_index: return False
+        if self.y_index != other.y_index: return False
+        return True
+
 
 class RandomSurface:
     def __init__(self, layout: HexagonalGrid, padding_factory: int=3):
