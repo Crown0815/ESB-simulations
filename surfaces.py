@@ -60,7 +60,7 @@ class HexagonalGrid:
 
 
 class Coordinate:
-    def __init__(self, x: float, y: float, x_index: int, y_index: int):
+    def __init__(self, x: float, y: float, x_index: int = 0, y_index: int = 0):
         self.x = x
         self.y = y
         self.x_index = x_index
@@ -74,15 +74,15 @@ class Coordinate:
         return Coordinate(0, 0, 0, 0)
 
     def closest_neighbor(self, coordinates):
-        distance = float('inf')
+        closest_distance = float('inf')
         closest = None
         for coordinate in coordinates:
-            d = self.distance_to(coordinate)
-            if d == 0 or d > distance:
+            distance = self.distance_to(coordinate)
+            if distance == 0 or distance > closest_distance:
                 continue
 
             closest = coordinate
-            distance = d
+            closest_distance = distance
 
         return closest
 
