@@ -76,7 +76,11 @@ class RandomSurfaceTests(unittest.TestCase):
         instance.initialize(1000, 1000, 50)
 
         self.assertTrue(set(instance.coordinates).issubset(set(instance.coordinates_with_padding)))
+        self.assertTrue(set(instance.padding).issubset(set(instance.coordinates_with_padding)))
+        self.assertEqual(set(instance.padding+instance.coordinates), (set(instance.coordinates_with_padding)))
+        
         self.assertEqual(len(set(instance.coordinates)), len(instance.coordinates))
+        self.assertEqual(len(set(instance.padding)), len(instance.padding))
         self.assertEqual(len(set(instance.coordinates_with_padding)), len(instance.coordinates_with_padding))
 
 

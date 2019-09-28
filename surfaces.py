@@ -106,15 +106,21 @@ class RandomSurface:
         self.grid = layout
         self.padding_factor = padding_factory
         self.coordinates_with_padding = list()
+        self.padding = list()
         self.coordinates = list()
+        self.x_length = 0
+        self.y_length = 0
 
     def initialize(self, x_max: float, y_max: float, average_distance: float):
+        self.x_length = x_max
+        self.y_length = y_max
         indices = self.padded_indices(x_max, y_max, average_distance)
         number_of_coordinates = int(len(indices) * self.probability(average_distance))
 
         random.shuffle(indices)
         coordinates = list(self.coordinates_from(indices, number_of_coordinates))
-        self.coordinates_with_padding, self.coordinates = self.optimize_coordinates(indices, coordinates, x_max, y_max, average_distance)
+        self.coordinates_with_padding, self.coordinates, self.padding = \
+            self.optimize_coordinates(indices, coordinates, x_max, y_max, average_distance)
 
     def optimize_coordinates(self, indices, coordinates, x_max: float, y_max: float, expected_distance: float):
         while True:
@@ -133,7 +139,8 @@ class RandomSurface:
             break
 
         print("Optimized coordinates to deviation of " + str(deviation))
-        return coordinates, inner_coordinates
+        padding = list(c for c in coordinates if c not in inner_coordinates)
+        return coordinates, inner_coordinates, padding
 
     def shuffle_coordinates(self, indices, coordinates, relative_amount):
 
@@ -176,6 +183,16 @@ class RandomSurface:
     def average_distance_to_closest_neighbor(self):
         return self.average_distance(self.coordinates, self.coordinates_with_padding)
 
+    def visualize(self):
+        x_values = list(c.x for c in self.coordinates)
+        y_values = list(c.y for c in self.coordinates)
+        plt.plot(x_values, y_values, 'o', color="black")
+        x_values = list(c.x for c in self.padding)
+        y_values = list(c.y for c in self.padding)
+        plt.plot(x_values, y_values, 'x', color="#BEBEBE")
+        plt.plot([0, 0, self.x_length, self.x_length, 0], [0, self.y_length, self.y_length, 0, 0], linestyle="-", color="#BEBEBE")
+        plt.show()
+
     @staticmethod
     def average_distance(coordinates, neighbors):
         closest_neighbor_distance = list()
@@ -200,11 +217,4 @@ if __name__ == '__main__':
     grid = HexagonalGrid(2.5)
     surface = RandomSurface(grid)
     surface.initialize(2000, 2000, 60)
-
-    x_values = list(c.x for c in surface.coordinates)
-    y_values = list(c.y for c in surface.coordinates)
-    plt.plot(x_values, y_values, 'o')
-    x_values = list(c.x for c in surface.coordinates_with_padding if c not in surface.coordinates)
-    y_values = list(c.y for c in surface.coordinates_with_padding if c not in surface.coordinates)
-    plt.plot(x_values, y_values, 'x')
-    plt.show()
+    surface.visualize()
