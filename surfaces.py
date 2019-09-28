@@ -102,7 +102,7 @@ class Coordinate:
 
 
 class RandomSurface:
-    def __init__(self, layout: HexagonalGrid, padding_factory: int=3):
+    def __init__(self, layout: HexagonalGrid, padding_factory: int = 3):
         self.grid = layout
         self.padding_factor = padding_factory
         self.coordinates_with_padding = list()
@@ -183,15 +183,21 @@ class RandomSurface:
     def average_distance_to_closest_neighbor(self):
         return self.average_distance(self.coordinates, self.coordinates_with_padding)
 
-    def visualize(self):
-        x_values = list(c.x for c in self.coordinates)
-        y_values = list(c.y for c in self.coordinates)
-        plt.plot(x_values, y_values, 'o', color="black")
-        x_values = list(c.x for c in self.padding)
-        y_values = list(c.y for c in self.padding)
-        plt.plot(x_values, y_values, 'x', color="#BEBEBE")
-        plt.plot([0, 0, self.x_length, self.x_length, 0], [0, self.y_length, self.y_length, 0, 0], linestyle="-", color="#BEBEBE")
-        plt.show()
+    def visualization(self):
+        f, ax = plt.subplots(figsize=(10, 10))
+        ax.plot(self.x_of(self.coordinates), self.y_of(self.coordinates), 'o', color="black")
+        ax.plot(self.x_of(self.padding), self.y_of(self.padding), 'x', color="#BEBEBE")
+        ax.plot([0, 0, self.x_length, self.x_length, 0], [0, self.y_length, self.y_length, 0, 0], linestyle="-",
+                color="#BEBEBE")
+        return f, ax
+
+    @staticmethod
+    def x_of(coordinates):
+        return list(c.x for c in coordinates)
+
+    @staticmethod
+    def y_of(coordinates):
+        return list(c.y for c in coordinates)
 
     @staticmethod
     def average_distance(coordinates, neighbors):
@@ -217,4 +223,5 @@ if __name__ == '__main__':
     grid = HexagonalGrid(2.5)
     surface = RandomSurface(grid)
     surface.initialize(2000, 2000, 60)
-    surface.visualize()
+    surface.visualization()
+    plt.show()

@@ -122,27 +122,18 @@ if __name__ == '__main__':
     grid = HexagonalGrid(2.5)
     surface = RandomSurface(grid)
     surface.initialize(2000, 2000, 60)
+    f, ax = surface.visualization()
 
     linker = Linker(surface.coordinates_with_padding, 2, 16)
     linker.create_links(32)
-
-    x_values = list(c.x for c in surface.coordinates)
-    y_values = list(c.y for c in surface.coordinates)
-    plt.plot(x_values, y_values, 'o', color="black")
-    x_values = list(c.x for c in surface.coordinates_with_padding if c not in surface.coordinates)
-    y_values = list(c.y for c in surface.coordinates_with_padding if c not in surface.coordinates)
-    plt.plot(x_values, y_values, 'x', color="#BEBEBE")
-
-    # inner border
-    plt.plot([0, 0, 2000, 2000, 0], [0, 2000, 2000, 0, 0], linestyle="-", color="#BEBEBE")
 
     links = linker.links
     for current_link in links:
         if current_link.is_open(): continue
         linkables = [current_link.linked1, current_link.linked2]
-        if len(list(surface.coordinates_within(linkables, 0, 2000, 0, 2000))) == 0 : continue
+        if len(list(surface.coordinates_within(linkables, 0, 2000, 0, 2000))) == 0: continue
 
         x_values = list(c.x for c in linkables)
         y_values = list(c.y for c in linkables)
-        plt.plot(x_values, y_values, marker="o", color="red")
+        ax.plot(x_values, y_values, marker="o", color="red")
     plt.show()

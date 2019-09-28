@@ -29,6 +29,12 @@ class HexagonalGridTests(unittest.TestCase):
         grid = self.create_test_instance(5)
         self.assertAlmostEqual(grid.unit_area(), 86.60, 2)
 
+    def test_probability(self):
+        instance = self.create_test_instance(5)
+        probability = instance.probability_of_distance(5)
+
+        self.assertEqual(probability, 1)
+
 
 class HexagonTests(unittest.TestCase):
 
