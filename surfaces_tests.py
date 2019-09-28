@@ -64,7 +64,7 @@ class RandomSurfaceTests(unittest.TestCase):
         self.test_positions_for_size(100)
         self.test_positions_for_size(200)
 
-    def test_positions_for_size(self, distance: int, runs: int = 10):
+    def test_positions_for_size(self, distance: int = 50, runs: int = 1):
         instance = self.create_test_instance()
         while runs > 0:
             instance.initialize(500, 500, distance)

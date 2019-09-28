@@ -97,6 +97,9 @@ class Coordinate:
         if self.y_index != other.y_index: return False
         return True
 
+    def __hash__(self):
+        return hash(self.x) ^ hash(self.y) ^ hash(self.x_index) ^ hash(self.y_index)
+
 
 class RandomSurface:
     def __init__(self, layout: HexagonalGrid, padding_factory: int=3):
