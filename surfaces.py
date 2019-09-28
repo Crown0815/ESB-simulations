@@ -90,6 +90,7 @@ class Coordinate:
         print(f"Index ({self.x_index}, {self.y_index}) at ({self.x}, {self.y})")
 
     def __eq__(self, other):
+        if other is None: return False
         if self.x != other.x: return False
         if self.y != other.y: return False
         if self.x_index != other.x_index: return False

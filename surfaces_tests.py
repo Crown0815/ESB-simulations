@@ -90,3 +90,8 @@ class CoordinateTests(unittest.TestCase):
         other = self.create_test_instance(1, 1)
 
         self.assertEqual(instance, other)
+
+    def test_inequality_to_None(self):
+        instance = self.create_test_instance(1, 1)
+
+        self.assertNotEqual(instance, None)
