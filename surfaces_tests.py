@@ -26,13 +26,13 @@ class HexagonalGridTests(unittest.TestCase):
         self.assertAlmostEqual(right.distance_to(up), 2)
 
     def test_unit_area(self):
-        grid = self.create_test_instance(2.5)
-        self.assertAlmostEqual(grid.unit_area(), 64.95, 2)
+        grid = self.create_test_instance(5)
+        self.assertAlmostEqual(grid.unit_area(), 86.60, 2)
 
 
 class HexagonTests(unittest.TestCase):
 
-    def test_area_from_inner(self):
+    def test_area_from_outer(self):
         outers = [1, 2, 5, 10, 20, 50, 100]
         areas = [2.60, 10.39, 64.95, 259.81, 1039.23, 6495.19, 25980.76]
 
