@@ -44,7 +44,10 @@ class HexagonalGrid:
         return Hexagon.area_from_outer(self.unit)
 
     def probability_of_distance(self, distance):
-        return self.unit_area() / Hexagon.area_from_inner(distance)
+        respective_unit = Hexagon.inner_to_outer(distance/2)
+        if respective_unit < self.unit:
+            raise Exception("distance of {} can not exist on {} grid".format(respective_unit, self.unit))
+        return self.unit_area() / Hexagon.area_from_outer(respective_unit)
 
     def max_x_index(self, max_value):
         return floor(max_value / (self.unit * 1.5))
@@ -86,6 +89,20 @@ class Coordinate:
 
         return closest
 
+    def closer_than(self, distance: float, coordinates):
+        for coordinate in coordinates:
+            distance_to = self.distance_to(coordinate)
+            if distance_to == 0: continue
+            if distance_to >= distance: continue
+            yield coordinate
+
+    def distances_within(self, distance: float, coordinates):
+        for coordinate in coordinates:
+            distance_to = self.distance_to(coordinate)
+            if distance_to == 0: continue
+            if distance_to >= distance: continue
+            yield distance_to
+
     def print(self):
         print(f"Index ({self.x_index}, {self.y_index}) at ({self.x}, {self.y})")
 
@@ -102,18 +119,20 @@ class Coordinate:
 
 
 class RandomSurface:
-    def __init__(self, layout: HexagonalGrid, padding_factory: int = 3):
+    def __init__(self, layout: HexagonalGrid, padding_factor: int = 3):
         self.grid = layout
-        self.padding_factor = padding_factory
+        self.padding_factor = padding_factor
         self.coordinates_with_padding = list()
         self.padding = list()
         self.coordinates = list()
         self.x_length = 0
         self.y_length = 0
+        self.target_distance = 0
 
     def initialize(self, x_max: float, y_max: float, average_distance: float):
         self.x_length = x_max
         self.y_length = y_max
+        self.target_distance = average_distance
         indices = self.padded_indices(x_max, y_max, average_distance)
         number_of_coordinates = int(len(indices) * self.probability(average_distance))
 
@@ -131,9 +150,10 @@ class RandomSurface:
                 continue
 
             print("requesting average distance for " + str(len(inner_coordinates)) + " inner_coordinates")
-            deviation = abs(self.average_distance(inner_coordinates, coordinates) / expected_distance - 1)
+            average_distance = self.average_distance_within(self.max_neighbor_distance(), inner_coordinates, coordinates)
+            deviation = abs(average_distance / expected_distance - 1)
             if deviation > 0.05:
-                print("Shuffle coordinates due to deviation of " + str(deviation))
+                print("Shuffle coordinates due to deviation of {:.1%} ({}/{})".format(deviation, average_distance, expected_distance))
                 coordinates, indices = self.shuffle_coordinates(indices, coordinates, deviation)
                 continue
             break
@@ -151,6 +171,9 @@ class RandomSurface:
 
         print("Shuffled " + str(count) + " coordinates")
         return coordinates, indices
+
+    def max_neighbor_distance(self):
+        return 1.5 * self.target_distance
 
     def reposition_coordinate(self, coordinates, indices):
         old = coordinates.pop(0)
@@ -183,6 +206,9 @@ class RandomSurface:
     def average_distance_to_closest_neighbor(self):
         return self.average_distance(self.coordinates, self.coordinates_with_padding)
 
+    def average_distance_to_neighbors(self):
+        return self.average_distance_within(self.max_neighbor_distance(), self.coordinates, self.coordinates_with_padding)
+
     def visualization(self):
         f, ax = plt.subplots(figsize=(10, 10))
         ax.plot(self.x_of(self.coordinates), self.y_of(self.coordinates), 'o', color="black")
@@ -207,6 +233,14 @@ class RandomSurface:
         for coordinate in coordinates:
             neighbor = coordinate.closest_neighbor(neighbors)
             closest_neighbor_distance.append(coordinate.distance_to(neighbor))
+        return mean(closest_neighbor_distance)
+
+    @staticmethod
+    def average_distance_within(within, coordinates, neighbors):
+        closest_neighbor_distance = list()
+        print("calculating average distance for " + str(len(coordinates)) + " coordinates")
+        for coordinate in coordinates:
+            closest_neighbor_distance = closest_neighbor_distance + list(coordinate.distances_within(within, neighbors))
         return mean(closest_neighbor_distance)
 
     @staticmethod
