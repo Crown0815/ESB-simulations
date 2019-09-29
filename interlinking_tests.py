@@ -23,7 +23,7 @@ class LinkableTests(TestCase):
 
     def test_link_with_other_link_links_both_and_returns_link(self):
         instance = self.create_test_instance()
-        other = self.create_test_instance()
+        other = self.create_instance_at_position(1, 1)
 
         link = instance.link_with(other)
 
@@ -66,8 +66,8 @@ class LinkableTests(TestCase):
 
     def test_is_linked_with_more_closed_links_than_threshold_returns_true(self):
         instance = self.create_test_instance(2)
-        instance.link_with(self.create_test_instance())
-        instance.link_with(self.create_test_instance())
+        instance.link_with(self.create_instance_at_position(1, 1))
+        instance.link_with(self.create_instance_at_position(1, 2))
 
         self.assertTrue(instance.is_linked(1))
         self.assertTrue(instance.is_linked(2))
@@ -107,8 +107,8 @@ class LinkTests(TestCase):
         return Link(linkable1, linkable2)
 
     @staticmethod
-    def create_test_linkable():
-        return Linkable(Coordinate.default())
+    def create_test_linkable(x=0, y=0):
+        return Linkable(Coordinate(x, y))
 
     def test_is_open_with_one_linkable_None_returns_true(self):
         instance = self.create_test_instance(self.create_test_linkable(), None)
@@ -122,19 +122,19 @@ class LinkTests(TestCase):
             Link(None, None)
 
     def test_other_returns_none_given_linkable(self):
-        l1 = self.create_test_linkable()
-        l2 = self.create_test_linkable()
+        l1 = self.create_test_linkable(0, 0)
+        l2 = self.create_test_linkable(0, 1)
         instance = self.create_test_instance(l1, l2)
 
         self.assertEqual(instance.other(l1), l2)
         self.assertEqual(instance.other(l2), l1)
 
     def test_other_argument_not_linked_by_link_raises_exception(self):
-        l1 = self.create_test_linkable()
-        l2 = self.create_test_linkable()
+        l1 = self.create_test_linkable(0, 0)
+        l2 = self.create_test_linkable(0, 1)
         instance = self.create_test_instance(l1, l2)
         with self.assertRaises(Exception):
-            instance.other(self.create_test_linkable())
+            instance.other(self.create_test_linkable(1, 1))
 
 
 class LinkerTests(TestCase):
