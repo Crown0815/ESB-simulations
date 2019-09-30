@@ -3,6 +3,7 @@ from math import *
 from statistics import *
 import random
 import matplotlib.pyplot as plt
+import tikzplotlib
 
 
 class Hexagon:
@@ -254,9 +255,15 @@ class RandomSurface:
             yield coordinate
 
 
-if __name__ == '__main__':
-    grid = HexagonalGrid(2.5)
+def create_surface(grid_size, size, distance, figure_size):
+    grid = HexagonalGrid(grid_size)
     surface = RandomSurface(grid)
-    surface.initialize(2000, 2000, 60)
-    surface.visualization()
+    surface.initialize(size, size, distance)
+    surface.visualization(figure_size)
+
+    tikzplotlib.save("./surface_g{}_d{}_x{}_y{}_f{}.tex".format(grid_size, distance, size, size, figure_size))
     plt.show()
+
+
+if __name__ == '__main__':
+    create_surface(2.5, 1000, 100, 5)
