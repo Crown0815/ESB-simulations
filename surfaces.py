@@ -209,12 +209,13 @@ class RandomSurface:
     def average_distance_to_neighbors(self):
         return self.average_distance_within(self.max_neighbor_distance(), self.coordinates, self.coordinates_with_padding)
 
-    def visualization(self):
-        f, ax = plt.subplots(figsize=(10, 10))
+    def visualization(self, figure_size=5):
+        f, ax = plt.subplots(figsize=(figure_size, figure_size))
+        ax.plot([0, 0, self.x_length, self.x_length, 0], [0, self.y_length, self.y_length, 0, 0], linestyle=":",
+                color="#BEBEBE")
+
         ax.plot(self.x_of(self.coordinates), self.y_of(self.coordinates), 'o', color="black")
         ax.plot(self.x_of(self.padding), self.y_of(self.padding), 'x', color="#BEBEBE")
-        ax.plot([0, 0, self.x_length, self.x_length, 0], [0, self.y_length, self.y_length, 0, 0], linestyle="-",
-                color="#BEBEBE")
         return f, ax
 
     @staticmethod
