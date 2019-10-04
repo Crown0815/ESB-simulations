@@ -17,7 +17,7 @@ class LinkingSimulation:
 
     def run(self, spot_distance: float):
         surface = RandomSurface(self.grid)
-        surface.initialize(self.grid_side_length, self.grid_side_length, spot_distance)
+        surface.initialize(self.grid_side_length, self.grid_side_length, spot_distance, verbose=False)
 
         linker = Linker(surface.coordinates_with_padding, self.max_links, self.linkable_length)
         linker.create_links(self.link_length)

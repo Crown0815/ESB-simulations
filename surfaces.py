@@ -45,7 +45,7 @@ class HexagonalGrid:
         return Hexagon.area_from_outer(self.unit)
 
     def probability_of_distance(self, distance):
-        respective_unit = Hexagon.inner_to_outer(distance/2)
+        respective_unit = Hexagon.inner_to_outer(distance / 2)
         if respective_unit < self.unit:
             raise Exception("distance of {} can not exist on {} grid".format(respective_unit, self.unit))
         return self.unit_area() / Hexagon.area_from_outer(respective_unit)
@@ -130,7 +130,7 @@ class RandomSurface:
         self.y_length = 0
         self.target_distance = 0
 
-    def initialize(self, x_max: float, y_max: float, average_distance: float):
+    def initialize(self, x_max: float, y_max: float, average_distance: float, verbose=True):
         self.x_length = x_max
         self.y_length = y_max
         self.target_distance = average_distance
@@ -140,37 +140,39 @@ class RandomSurface:
         random.shuffle(indices)
         coordinates = list(self.coordinates_from(indices, number_of_coordinates))
         self.coordinates_with_padding, self.coordinates, self.padding = \
-            self.optimize_coordinates(indices, coordinates, x_max, y_max, average_distance)
+            self.optimize_coordinates(indices, coordinates, x_max, y_max, average_distance, verbose)
 
-    def optimize_coordinates(self, indices, coordinates, x_max: float, y_max: float, expected_distance: float):
+    def optimize_coordinates(self, indices, coordinates, x_max: float, y_max: float, expected_distance: float, verbose=True):
         while True:
             inner_coordinates = list(self.coordinates_within(coordinates, 0, x_max, 0, y_max))
             if len(inner_coordinates) == 0:
-                print("Shuffle coordinates because all were positioned in padding")
-                coordinates, indices = self.shuffle_coordinates(indices, coordinates, 0.5)
+                if verbose: print("Shuffle coordinates because all were positioned in padding")
+                coordinates, indices = self.shuffle_coordinates(indices, coordinates, 0.5, verbose)
                 continue
 
-            print("requesting average distance for " + str(len(inner_coordinates)) + " inner_coordinates")
-            average_distance = self.average_distance_within(self.max_neighbor_distance(), inner_coordinates, coordinates)
+            if verbose: print("requesting average distance for " + str(len(inner_coordinates)) + " inner_coordinates")
+            average_distance = self.average_distance_within(self.max_neighbor_distance(), inner_coordinates,
+                                                            coordinates)
             deviation = abs(average_distance / expected_distance - 1)
             if deviation > 0.05:
-                print("Shuffle coordinates due to deviation of {:.1%} ({}/{})".format(deviation, average_distance, expected_distance))
+                if verbose: print("Shuffle coordinates due to deviation of {:.1%} ({}/{})".format(deviation, average_distance,
+                                                                                      expected_distance))
                 coordinates, indices = self.shuffle_coordinates(indices, coordinates, deviation)
                 continue
             break
 
-        print("Optimized coordinates to deviation of " + str(deviation))
+        if verbose: print("Optimized coordinates to deviation of " + str(deviation))
         padding = list(c for c in coordinates if c not in inner_coordinates)
         return coordinates, inner_coordinates, padding
 
-    def shuffle_coordinates(self, indices, coordinates, relative_amount):
+    def shuffle_coordinates(self, indices, coordinates, relative_amount, verbose=True):
 
         random.shuffle(indices)
         count = int(len(coordinates) * relative_amount)
         for _ in range(count):
             coordinates, indices = self.reposition_coordinate(coordinates, indices)
 
-        print("Shuffled " + str(count) + " coordinates")
+        if verbose: print("Shuffled " + str(count) + " coordinates")
         return coordinates, indices
 
     def max_neighbor_distance(self):
@@ -208,7 +210,8 @@ class RandomSurface:
         return self.average_distance(self.coordinates, self.coordinates_with_padding)
 
     def average_distance_to_neighbors(self):
-        return self.average_distance_within(self.max_neighbor_distance(), self.coordinates, self.coordinates_with_padding)
+        return self.average_distance_within(self.max_neighbor_distance(), self.coordinates,
+                                            self.coordinates_with_padding)
 
     def visualization(self, figure_size=5):
         f, ax = plt.subplots(figsize=(figure_size, figure_size))
@@ -231,7 +234,6 @@ class RandomSurface:
     def average_distance(coordinates, neighbors):
         closest_neighbor_distance = list()
 
-        print("calculating average distance for " + str(len(coordinates)) + " coordinates")
         for coordinate in coordinates:
             neighbor = coordinate.closest_neighbor(neighbors)
             closest_neighbor_distance.append(coordinate.distance_to(neighbor))
@@ -240,7 +242,6 @@ class RandomSurface:
     @staticmethod
     def average_distance_within(within, coordinates, neighbors):
         closest_neighbor_distance = list()
-        print("calculating average distance for " + str(len(coordinates)) + " coordinates")
         for coordinate in coordinates:
             closest_neighbor_distance = closest_neighbor_distance + list(coordinate.distances_within(within, neighbors))
         return mean(closest_neighbor_distance)
