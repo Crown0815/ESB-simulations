@@ -3,6 +3,7 @@ from surfaces import RandomSurface, HexagonalGrid
 import matplotlib.pyplot as plt
 import tikzplotlib
 import statistics
+from math import sqrt
 
 
 class LinkingSimulation:
@@ -111,6 +112,30 @@ class LinkingSimulationStatistics:
     def ratio_unlinked_linkables(self, linked_threshold: int = 1):
         return self.mean(lambda x: x.ratio_unlinked_linkables(linked_threshold))
 
+    def ratio_closed_links_stdev(self):
+        return self.stdev(lambda x: x.ratio_closed_links())
+
+    def ratio_open_links_stdev(self):
+        return self.stdev(lambda x: x.ratio_open_links())
+
+    def ratio_linked_linkables_stdev(self, linked_threshold: int = 1):
+        return self.stdev(lambda x: x.ratio_linked_linkables(linked_threshold))
+
+    def ratio_unlinked_linkables_stdev(self, linked_threshold: int = 1):
+        return self.stdev(lambda x: x.ratio_unlinked_linkables(linked_threshold))
+
+    def ratio_closed_links_stderr(self):
+        return self.ratio_closed_links_stdev()/sqrt(self.count_of_simulations())
+
+    def ratio_open_links_stderr(self):
+        return self.ratio_open_links_stdev()/sqrt(self.count_of_simulations())
+
+    def ratio_linked_linkables_stderr(self, linked_threshold: int = 1):
+        return self.ratio_linked_linkables_stdev(linked_threshold)/sqrt(self.count_of_simulations())
+
+    def ratio_unlinked_linkables_stderr(self, linked_threshold: int = 1):
+        return self.ratio_unlinked_linkables_stdev(linked_threshold)/sqrt(self.count_of_simulations())
+
     def mean_with_stdev(self, resolver):
         return self.mean(resolver), self.stdev(resolver)
 
@@ -122,6 +147,9 @@ class LinkingSimulationStatistics:
 
     def calculate_statistics(self, statistic, resolver):
         return statistic(resolver(x) for x in self.simulation_results)
+
+    def count_of_simulations(self):
+        return len(self.simulation_results)
 
 
 class Analyzer:
@@ -143,6 +171,24 @@ class Analyzer:
         print("Closed = {}/{} (ratio: {:.1%})".format(sim.count_of_closed_links(), link_count,
                                                       sim.ratio_closed_links()))
         print("Open = {}/{} (ratio: {:.1%})".format(sim.count_of_open_links(), link_count, sim.ratio_open_links()))
+
+    @staticmethod
+    def report_statistics(simulation):
+        sim = simulation
+        print()
+        print("----------------------------")
+        print("Uncertainties as standard deviations")
+        print()
+        print("Linkables:")
+        print(r"Linked ratio: {:.1%} ± {:.1%})".format(sim.ratio_linked_linkables(), sim.ratio_linked_linkables_stdev()))
+        print(r"Unlinked ratio: {:.1%} ± {:.1%})".format(sim.ratio_unlinked_linkables(), sim.ratio_unlinked_linkables_stdev()))
+
+        print("Links:")
+        print(r"Closed ratio: {:.1%} ± {:.1%})".format(sim.ratio_closed_links(), sim.ratio_closed_links_stdev()))
+        print(r"Open ratio: {:.1%} ± {:.1%})".format(sim.ratio_open_links(), sim.ratio_open_links_stdev()))
+        print()
+        print("----------------------------")
+        print()
 
     @staticmethod
     def visualization(simulation):
