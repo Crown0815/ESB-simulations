@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import tikzplotlib
 import statistics
 from math import sqrt
+import tqdm
 
 
 class LinkingSimulation:
@@ -235,12 +236,11 @@ def create_surface(grid_size, size, distance, link_length, linkable_length, max_
 def create_statistics(grid_size, size, distance, link_length, linkable_length, max_links, run_count):
     simulation = LinkingSimulation(link_length, linkable_length, size, grid_size, max_links)
     simulation_statistics = LinkingSimulationStatistics()
-    for _ in range(run_count):
+    for _ in tqdm.tqdm(range(run_count)):
         simulation_statistics.append(simulation.run(distance))
 
-    Analyzer.report(simulation_statistics)
+    Analyzer.report_statistics(simulation_statistics)
 
 
 if __name__ == '__main__':
-    # create_surface(30, 1000, 60, 28, 16, 3, 5)
-    create_statistics(30, 1000, 60, 28, 16, 3, 2)
+    create_statistics(2.5, 1000, 60, 28, 16, 3, 5)
