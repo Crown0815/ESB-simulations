@@ -1,10 +1,11 @@
 from interlinking import Linker
-from surfaces import RandomSurface, HexagonalGrid
+from surfaces import RandomSurface, HexagonalGrid, create_surface
 import matplotlib.pyplot as plt
 import tikzplotlib
 import statistics
 from math import sqrt
 import tqdm
+from csv_reader import SimpleCsv
 
 
 class LinkingSimulation:
@@ -126,16 +127,16 @@ class LinkingSimulationStatistics:
         return self.stdev(lambda x: x.ratio_unlinked_linkables(linked_threshold))
 
     def ratio_closed_links_stderr(self):
-        return self.ratio_closed_links_stdev()/sqrt(self.count_of_simulations())
+        return self.ratio_closed_links_stdev()/sqrt(self.count())
 
     def ratio_open_links_stderr(self):
-        return self.ratio_open_links_stdev()/sqrt(self.count_of_simulations())
+        return self.ratio_open_links_stdev()/sqrt(self.count())
 
     def ratio_linked_linkables_stderr(self, linked_threshold: int = 1):
-        return self.ratio_linked_linkables_stdev(linked_threshold)/sqrt(self.count_of_simulations())
+        return self.ratio_linked_linkables_stdev(linked_threshold)/sqrt(self.count())
 
     def ratio_unlinked_linkables_stderr(self, linked_threshold: int = 1):
-        return self.ratio_unlinked_linkables_stdev(linked_threshold)/sqrt(self.count_of_simulations())
+        return self.ratio_unlinked_linkables_stdev(linked_threshold)/sqrt(self.count())
 
     def mean_with_stdev(self, resolver):
         return self.mean(resolver), self.stdev(resolver)
@@ -149,7 +150,7 @@ class LinkingSimulationStatistics:
     def calculate_statistics(self, statistic, resolver):
         return statistic(resolver(x) for x in self.simulation_results)
 
-    def count_of_simulations(self):
+    def count(self):
         return len(self.simulation_results)
 
 
@@ -222,15 +223,15 @@ class Analyzer:
         return figure, axis
 
 
-def create_surface(grid_size, size, distance, link_length, linkable_length, max_links, figure_size):
+def create_linked_surface(grid_size, size, distance, link_length, linkable_length, max_links, figure_size, show_plot=False):
     linking_simulation = LinkingSimulation(link_length, linkable_length, size, grid_size, max_links)
     result = linking_simulation.run(distance)
     Analyzer.report(result)
     Analyzer.visualization(result)
-    tikzplotlib.save("./linking_g{}_d{}_x{}_y{}_l{}_c{}_f{}.tex".format(grid_size, distance, size, size,
+    tikzplotlib.save("./generated/linking_g{}_d{}_x{}_y{}_l{}_c{}_f{}.tex".format(grid_size, distance, size, size,
                                                                         link_length + 2 * linkable_length,
                                                                         max_links, figure_size))
-    plt.show()
+    if show_plot: plt.show()
 
 
 def create_statistics(grid_size, size, distance, link_length, linkable_length, max_links, run_count):
@@ -239,8 +240,24 @@ def create_statistics(grid_size, size, distance, link_length, linkable_length, m
     for _ in tqdm.tqdm(range(run_count)):
         simulation_statistics.append(simulation.run(distance))
 
-    Analyzer.report_statistics(simulation_statistics)
+    if simulation_statistics.count() < 1: return
+    if simulation_statistics.count() == 1:
+        Analyzer.report(simulation_statistics)
+    else:
+        Analyzer.report_statistics(simulation_statistics)
+
+
+def with_args_from_file(method, file_path, header_rows=1):
+    reader = SimpleCsv()
+    reader.read(file_path, ",")
+    for index, row in enumerate(reader.rows):
+        if index < header_rows: continue
+        method(*list(eval(x) for x in row))
 
 
 if __name__ == '__main__':
-    create_statistics(2.5, 1000, 60, 28, 16, 3, 5)
+    with_args_from_file(create_surface, "./simulation_parameters/surface_plots.csv")
+    with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
+    with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
+    
+    # plt.show()
