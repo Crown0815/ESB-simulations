@@ -77,34 +77,42 @@ path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/
 
 
 # vrm_printer = VrmPrinter()
-csv_average = CsvAverage()
+# csv_average = CsvAverage()
 
-csv_average.add_source(path_4hb_trm_1)
-csv_average.add_source(path_4hb_trm_2)
-csv_average.add_source(path_4hb_trm_3)
-csv_average.add_source(path_4hb_trm_4)
+# csv_average.add_source(path_4hb_trm_1)
+# csv_average.add_source(path_4hb_trm_2)
+# csv_average.add_source(path_4hb_trm_3)
+# csv_average.add_source(path_4hb_trm_4)
 
 # csv_average.print(0, 3)
-x = list(csv_average.values(TRM_TIME, -499.5)) + list(csv_average.values(TRM_TIME))
-y = list(csv_average.values(TRM_DOWN_NORM)) + list(csv_average.values(TRM_UP_NORM))
+# x = list(csv_average.values(TRM_TIME, -499.5)) + list(csv_average.values(TRM_TIME))
+# y = list(csv_average.values(TRM_DOWN_NORM)) + list(csv_average.values(TRM_UP_NORM))
 
-y_smooth = savgol_filter(y, 11, 5)
-SimpleTikZPrinter.print(x, y_smooth)
+# y_smooth = savgol_filter(y, 11, 5)
+# SimpleTikZPrinter.print(x, y_smooth)
 # csv_average.print(0, 7)
 
-# reader = SimpleCsv()
+reader = SimpleCsv()
 
 # path = path_4hb_vrm_lukas_4
 # reader.read(path)
 # reader.print(0, 3)
 
-# paths = paths_6hb_mg_tit
-# for index, path in enumerate(paths, start=1):
-#     if index % 2 == 0:
-#         continue
-#     reader.read(path)
-#     color = "mycolor1!"+str(100*index/len(paths))+"!mycolor2"
-#     print('\\addplot [color='+color+'] table{%')
-#     reader.print(TRM_TIME, TRM_DOWN_SMOOTH, -4995)
-#     reader.print(TRM_TIME, TRM_UP_SMOOTH)
-#     print("};\n")
+paths = paths_96bp_mg_tit
+fig, (ax1, ax2) = plt.subplots(2)
+for index, path in enumerate(paths, start=1):
+    if index % 2 == 0:
+        continue
+    reader.read(path)
+    color = "mycolor1!"+str(100*index/len(paths))+"!mycolor2"
+    print('\\addplot [color='+color+'] table{%')
+    x = list(reader.values(TRM_TIME, -100)) + list(reader.values(TRM_TIME))
+    y = list(reader.values(TRM_DOWN_NORM)) + list(reader.values(TRM_UP_NORM))
+
+    y_smooth = savgol_filter(y, 7, 1)
+    SimpleTikZPrinter.print(x, y_smooth)
+    print("};\n")
+
+    ax1.plot(x, y)
+    ax2.plot(x, y_smooth)
+plt.show()
