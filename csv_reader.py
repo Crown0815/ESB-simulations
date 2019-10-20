@@ -119,6 +119,13 @@ class SimpleCsv:
                     print(f'{float(row[col1])+x_offset:.2f}\t\t{row[col2]}{row_separator}')
                 line_count += 1
 
+    def values(self, col: int = 0, offset: float=0, has_header: bool = True):
+        row_index = 0
+        for row in self.rows:
+            if row_index > 0 or not has_header:
+                yield float(row[col]) + offset
+            row_index += 1
+
 
 class SimpleTikZPrinter:
     @staticmethod
