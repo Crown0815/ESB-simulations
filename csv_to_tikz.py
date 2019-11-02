@@ -2,6 +2,9 @@ from csv_reader import *
 from glob import glob
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
+from scipy import optimize
+from math import *
+import numpy as np
 
 TRM_TIME = 0
 TRM_DOWN_NORM = 2
@@ -74,6 +77,10 @@ path_trm_example = '../Paper1_data/Data/Figure_2/48mer_Switching/ch4e3b-20170330
 
 path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/Regeneration w 6HB_anchor/Functionalization/ch2e3b-20170327-173741.dyn'
 
+path_incubation_vs_live = '../OrigamiUnpublished/IncubationVsLiveImmobilization.csv'
+path_real_time_binding_dr = '../OrigamiUnpublished/RealTimeBindingInDynamicResponse.csv'
+path_size_comparison = '../OrigamiUnpublished/SizeComparisons.csv'
+
 
 
 # vrm_printer = VrmPrinter()
@@ -94,25 +101,54 @@ path_staple = '../Paper1_data/Data/Figure_3/StapleHybridization/-02V to 02V 1Hz/
 
 reader = SimpleCsv()
 
-# path = path_4hb_vrm_lukas_4
-# reader.read(path)
-# reader.print(0, 3)
+path = path_size_comparison
+reader.read(path, ',')
 
-paths = paths_96bp_mg_tit
-fig, (ax1, ax2) = plt.subplots(2)
-for index, path in enumerate(paths, start=1):
-    if index % 2 == 0:
-        continue
-    reader.read(path)
-    color = "mycolor1!"+str(100*index/len(paths))+"!mycolor2"
-    print('\\addplot [color='+color+'] table{%')
-    x = list(reader.values(TRM_TIME, -100)) + list(reader.values(TRM_TIME))
-    y = list(reader.values(TRM_DOWN_NORM)) + list(reader.values(TRM_UP_NORM))
+fig, (ax1) = plt.subplots(1)
 
-    y_smooth = savgol_filter(y, 7, 1)
-    SimpleTikZPrinter.print(x, y_smooth)
+for index in range(0, 10, 2):
+    x = list(reader.values(index+0))
+    y = list(reader.values(index+1))
+
+    print('')
+    print('\\addplot [color=mycolor1] table{%')
+    SimpleTikZPrinter.print(x, y)
     print("};\n")
 
     ax1.plot(x, y)
-    ax2.plot(x, y_smooth)
+
+# Fit for observable rate of Anti-Her2
+
+# fitfunc = lambda p, var: ((var > p[2]) * p[0] * (1-np.exp(p[1] * (var-p[2])))) + p[3]  # Target function
+# errfunc = lambda p, var, fix: fitfunc(p, var) - fix  # Distance to the target function
+# p0 = (350, -0.3, 20, 1650.)  # Initial guess for the parameters
+# p1, success = optimize.leastsq(errfunc, p0[:], args=(x, y))
+# y_fit = [fitfunc(p1, x_i) for x_i in x]
+# ax1.plot(x, y_fit)
+# print(p1)
+#
+# print('\\addplot [color=mycolor1] table{%')
+# SimpleTikZPrinter.print(x, y_fit)
+# print("};\n")
+
 plt.show()
+
+
+# paths = paths_96bp_mg_tit
+# fig, (ax1, ax2) = plt.subplots(2)
+# for index, path in enumerate(paths, start=1):
+#     if index % 2 == 0:
+#         continue
+#     reader.read(path)
+#     color = "mycolor1!"+str(100*index/len(paths))+"!mycolor2"
+#     print('\\addplot [color='+color+'] table{%')
+#     x = list(reader.values(TRM_TIME, -100)) + list(reader.values(TRM_TIME))
+#     y = list(reader.values(TRM_DOWN_NORM)) + list(reader.values(TRM_UP_NORM))
+#
+#     y_smooth = savgol_filter(y, 7, 1)
+#     SimpleTikZPrinter.print(x, y_smooth)
+#     print("};\n")
+#
+#     ax1.plot(x, y)
+#     ax2.plot(x, y_smooth)
+# plt.show()
