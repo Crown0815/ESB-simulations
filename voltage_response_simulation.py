@@ -119,6 +119,10 @@ def inflection_point_slope(fluorescence: dict) -> int:
     return diff_fluo.min()
 
 
+def potential_at_distance(distance: float, start_potential: float) -> float:
+    return start_potential * exp(-kappa * distance)
+
+
 if __name__ == "__main__":
     potentials = [-0.4 + 0.01 * x for x in range(0, 81, 1)]  # potential range
     for potential in potentials:
