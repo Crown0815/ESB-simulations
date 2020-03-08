@@ -1,6 +1,6 @@
 from math import *
 
-tau = 
+tau = 1.6
 
 
 def relative_electrode_charge(t):
