@@ -41,8 +41,8 @@ rp = 0e-9                           # protein radius (defined below rps)
 # Environment constants
 epsilon_r = 78.49                   # relative permitivity of water at 20°C
 T = 298.15                          # Temperature [K]
-c = 0.012                            # salt concentration in [M]
-v = 2                               # salt valency
+c = 0.05                            # salt concentration in [M]
+v = 1                               # salt valency
 
 # Simulation details
 angles = [0.01 * constants.pi / 2 * x for x in range(1, 101, 1)]    # angle range
