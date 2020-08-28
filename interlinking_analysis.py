@@ -9,25 +9,26 @@ from csv_reader import SimpleCsv
 
 
 class LinkingSimulation:
-    def __init__(self, link_length: float, linkable_length: float = 0, grid_side_length=500,
+    def __init__(self, link_length: float, linkable_length: float = 0, grid_width=500, grid_height=500,
                  grid_unit_length: float = 2.5, max_links: int = 1):
         self.link_length = link_length
         self.max_links = max_links
         self.linkable_length = linkable_length
 
         self.grid = HexagonalGrid(grid_unit_length)
-        self.grid_side_length = grid_side_length
+        self.grid_width = grid_width
+        self.grid_height = grid_height
 
     def run(self, spot_distance: float):
         surface = RandomSurface(self.grid)
-        surface.initialize(self.grid_side_length, self.grid_side_length, spot_distance, verbose=False)
+        surface.initialize(self.grid_width, self.grid_height, spot_distance, verbose=False)
 
         linker = Linker(surface.coordinates_with_padding, self.max_links, self.linkable_length)
         linker.create_links(self.link_length)
 
         linkables = list(surface.coordinates_within(linker.interlinked,
-                                                    x_max=self.grid_side_length,
-                                                    y_max=self.grid_side_length))
+                                                    x_max=self.grid_width,
+                                                    y_max=self.grid_height))
         return LinkingSimulationResult(surface, linkables)
 
 
@@ -223,12 +224,12 @@ class Analyzer:
         return figure, axis
 
 
-def create_linked_surface(grid_size, size, distance, link_length, linkable_length, max_links, figure_size, show_plot=False):
-    linking_simulation = LinkingSimulation(link_length, linkable_length, size, grid_size, max_links)
+def create_linked_surface(grid_size, width, height, distance, link_length, linkable_length, max_links, figure_size, show_plot=False):
+    linking_simulation = LinkingSimulation(link_length, linkable_length, width, height, grid_size, max_links)
     result = linking_simulation.run(distance)
     Analyzer.report(result)
     Analyzer.visualization(result)
-    tikzplotlib.save("./generated/linking_g{}_d{}_x{}_y{}_l{}_c{}_f{}.tex".format(grid_size, distance, size, size,
+    tikzplotlib.save("./generated/linking_g{}_d{}_x{}_y{}_l{}_c{}_f{}.tex".format(grid_size, distance, width, height,
                                                                         link_length + 2 * linkable_length,
                                                                         max_links, figure_size))
     if show_plot: plt.show()

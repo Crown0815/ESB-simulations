@@ -256,13 +256,13 @@ class RandomSurface:
             yield coordinate
 
 
-def create_surface(grid_size, size, distance, figure_size, show_plot=False):
+def create_surface(grid_size, width, height, distance, figure_size, show_plot=False):
     grid = HexagonalGrid(grid_size)
     surface = RandomSurface(grid)
-    surface.initialize(size, size, distance)
+    surface.initialize(width, height, distance)
     surface.visualization(figure_size)
 
-    tikzplotlib.save("./generated/surface_g{}_d{}_x{}_y{}_f{}.tex".format(grid_size, distance, size, size, figure_size))
+    tikzplotlib.save("./generated/surface_g{}_d{}_x{}_y{}_f{}.tex".format(grid_size, distance, width, height, figure_size))
     if show_plot: plt.show()
 
 
