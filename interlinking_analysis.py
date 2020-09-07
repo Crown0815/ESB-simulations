@@ -224,7 +224,8 @@ class Analyzer:
         return figure, axis
 
 
-def create_linked_surface(grid_size, width, height, distance, link_length, linkable_length, max_links, figure_size, show_plot=False):
+def create_linked_surface(grid_size, width, height, distance, link_length, linkable_length, max_links, figure_size, show_plot=True):
+    if figure_size == 0: return
     linking_simulation = LinkingSimulation(link_length, linkable_length, width, height, grid_size, max_links)
     result = linking_simulation.run(distance)
     Analyzer.report(result)
