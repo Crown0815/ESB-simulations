@@ -49,7 +49,7 @@ class Linkable(Coordinate):
     def find_partner(self, linkables, max_distance):
         closest_neighbor = self.closest_neighbor(linkables)
         if closest_neighbor is None: return None
-        if self.distance_to(closest_neighbor) > max_distance: return None
+        if self.distance_to(closest_neighbor) > (max_distance * 1.01): return None
 
         return closest_neighbor
 
