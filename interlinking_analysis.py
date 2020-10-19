@@ -1,11 +1,13 @@
 from interlinking import Linker
-from surfaces import RandomSurface, HexagonalGrid, create_surface
+from surfaces import RandomSurface, HexagonalGrid
 import matplotlib.pyplot as plt
 import tikzplotlib
 import statistics
 from math import sqrt
 import tqdm
 from csv_reader import SimpleCsv
+import sys
+from datetime import datetime
 
 
 class LinkingSimulation:
@@ -185,10 +187,18 @@ class Analyzer:
         print("Linkables:")
         print(r"Linked ratio: {:.1%} ± {:.1%})".format(sim.ratio_linked_linkables(), sim.ratio_linked_linkables_stdev()))
         print(r"Unlinked ratio: {:.1%} ± {:.1%})".format(sim.ratio_unlinked_linkables(), sim.ratio_unlinked_linkables_stdev()))
-
+        print()
+        linked = sim.ratio_linked_linkables_stdev()
+        print(r"Formatted: (X,  {:.1%})  +- ({:.1%}, {:.1%}))".format(sim.ratio_linked_linkables(), linked, linked))
+        print(r"Formatted: (X,  {:.1%}))".format(sim.ratio_unlinked_linkables()))
+        print()
         print("Links:")
-        print(r"Closed ratio: {:.1%} ± {:.1%})".format(sim.ratio_closed_links(), sim.ratio_closed_links_stdev()))
+        closed = sim.ratio_closed_links_stdev()
+        print(r"Closed ratio: {:.1%} ± {:.1%})".format(sim.ratio_closed_links(), closed))
         print(r"Open ratio: {:.1%} ± {:.1%})".format(sim.ratio_open_links(), sim.ratio_open_links_stdev()))
+        print()
+        print(r"Formatted: (X,  {:.1%})  +- ({:.1%}, {:.1%}))".format(sim.ratio_closed_links(), closed, closed))
+        print(r"Formatted: (X,  {:.1%}))".format(sim.ratio_open_links()))
         print()
         print("----------------------------")
         print()
@@ -253,13 +263,16 @@ def with_args_from_file(method, file_path, header_rows=1):
     reader = SimpleCsv()
     reader.read(file_path, ",")
     for index, row in enumerate(reader.rows):
+        print(row)
         if index < header_rows: continue
         method(*list(eval(x) for x in row))
 
 
 if __name__ == '__main__':
-    with_args_from_file(create_surface, "./simulation_parameters/surface_plots.csv")
-    with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
+    sys.stdout = open('generated/interlinking_simulation.txt', 'w')
+    print("Simulation started at ", datetime.now())
+    # with_args_from_file(create_surface, "./simulation_parameters/surface_plots.csv")
+    # with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
     with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
-    
+    sys.stdout.close()
     # plt.show()
