@@ -24,6 +24,11 @@ rho_dna = -2*e/(b*xi)               # effective line charge density in [C/m]
 rho_A_dna = -2*e/(b*xi*2*r_dna)     # effective area charge density in [C/m^2]
 bp = 48                             # number of nucleotides (defined below as fs)
 
+# Origami linker
+linker_length = 16.0e-9             # length of linker [m]
+rho_A_linker = rho_A_dna            # effective area charge density in [C/m^2]
+r_linker = r_dna                    # radius of linker [m]
+
 # 4HB Origami constants
 r_4hb = 3.14e-9                     # radius of 4 helix bundle cylinder [m]
 rho_4hb = -8*e/(b*xi)               # effective line charge density in [C/m]
@@ -81,6 +86,13 @@ def free_electric_energy_2d(angle, potential, lever_length, lever_radius, area_c
     return (potential * gamma * area_charge_density / (kappa * kappa) *
             (1 - exp(-kappa * lever_length * sin(angle))) / sin(angle) *
             (1 - exp(-kappa * lever_radius * cos(angle))) / cos(angle))
+
+
+def free_electric_energy_2d_48mer_spacer(angle, potential, lever_length, lever_radius, area_charge_density):
+    return (free_electric_energy_2d(angle, potential, linker_length + lever_length, lever_radius, area_charge_density) -
+            free_electric_energy_2d(angle, potential, linker_length, lever_radius, area_charge_density) +
+            free_electric_energy_2d(angle, potential, linker_length, r_linker, rho_A_linker))
+
 
 
 def orientation_probability(angle, free_electric_energy):
@@ -151,17 +163,20 @@ def potential_at_distance(distance: float, start_potential: float) -> float:
     return start_potential * exp(-kappa * distance)
 
 
-def compare_line_vs_area_charge_density(potentials, length, radius, line_charge_density, area_charge_density):
+def compare_line_vs_area_charge_density(potentials, length, radius, line_charge_density, area_charge_density, color):
     area_result = normalized_fluorescence(potentials, length, radius, area_charge_density, free_electric_energy_2d)
     area_fluorescence = list(area_result.values())
 
     line_result = normalized_fluorescence(_potentials, length, radius, line_charge_density, free_electric_energy_1d)
     line_fluorescence = list(line_result.values())
 
-    print(f'Inflection points for line charge density: {inflection_point(line_result)}, area charge density: {inflection_point(area_result)}')
-    print(f'Inflection point slope for line charge density: {inflection_point_slope(line_result)}, area charge density: {inflection_point_slope(area_result)}')
+    spacer_result = normalized_fluorescence(_potentials, length, radius, area_charge_density, free_electric_energy_2d_48mer_spacer)
+    spacer_fluorescence = list(spacer_result.values())
 
-    plt.plot(potentials, line_fluorescence, 'r--', potentials, area_fluorescence)
+    print(f'Inflection points for line charge density: {inflection_point(line_result)}, area charge density: {inflection_point(area_result)}, area charge density with spacer: {inflection_point(spacer_result)}')
+    print(f'Inflection point slope for line charge density: {inflection_point_slope(line_result)}, area charge density: {inflection_point_slope(area_result)}, area charge density with spacer: {inflection_point_slope(spacer_result)}')
+
+    plt.plot(potentials, line_fluorescence, color+':', potentials, area_fluorescence, color+"--", potentials, spacer_fluorescence, color)
 
 
 if __name__ == "__main__":
@@ -171,10 +186,10 @@ if __name__ == "__main__":
     #     for angle, probability in probabilities.items():
     #         print(f'{potential:.2f}\t\t{angle/pi*180:.2f}\t\t{probability:.8f}\\\\')
 
-    compare_line_vs_area_charge_density(_potentials,  16e-9, r_dna, rho_dna, rho_A_dna)
-    compare_line_vs_area_charge_density(_potentials,  32e-9, r_dna, rho_dna, rho_A_dna)
-    compare_line_vs_area_charge_density(_potentials,  50e-9, r_4hb, rho_4hb, rho_A_4hb)
-    compare_line_vs_area_charge_density(_potentials, 100e-9, r_6hb, rho_6hb, rho_A_6hb)
+    compare_line_vs_area_charge_density(_potentials,  16e-9, r_dna, rho_dna, rho_A_dna, 'b')
+    compare_line_vs_area_charge_density(_potentials,  32e-9, r_dna, rho_dna, rho_A_dna, 'g')
+    compare_line_vs_area_charge_density(_potentials,  50e-9, r_4hb, rho_4hb, rho_A_4hb, 'r')
+    compare_line_vs_area_charge_density(_potentials, 100e-9, r_6hb, rho_6hb, rho_A_6hb, 'c')
     plt.show()
 
 
