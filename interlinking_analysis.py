@@ -1,5 +1,5 @@
 from interlinking import Linker
-from surfaces import RandomSurface, HexagonalGrid
+from surfaces import *
 import matplotlib.pyplot as plt
 import tikzplotlib
 import statistics
@@ -259,6 +259,27 @@ def create_statistics(grid_size, width, height, distance, link_length, linkable_
         Analyzer.report_statistics(simulation_statistics)
 
 
+def create_surface_from_drop_statistics(grid_size, simulation_area, total_area, volume, concentration, immobilization_probability, figure_size):
+    grid = HexagonalGrid(grid_size)
+    surface = RandomSurface(grid)
+    distances = list()
+
+    for index in range(10):
+        print(fr"Surface {index:3}:")
+        surface.distribute_targets_from_liquid_drop(simulation_area, total_area, volume, concentration, immobilization_probability)
+        closest_neighbors = surface.distances_to_closest_neighbor()
+        print(fr"Distances: {closest_neighbors}")
+        print(fr"Distance to closest neighbor: {statistics.mean(closest_neighbors):.2f} ± {statistics.stdev(closest_neighbors):.2f})")
+        distances.append(surface.distance_to_closest_neighbor_average())
+
+    print(fr"Average distance to closest neighbor: {statistics.mean(distances):.2f} ± {statistics.stdev(distances):.2f})")
+    surface.visualization(figure_size)
+    tikzplotlib.save("./generated/surface_from_drop_g{}_sa{}_d{}_v{}_c{}_p{}_f{}.tex".format(grid_size, simulation_area,
+                                                                                             sqrt(total_area/pi/2)*2,
+                                                                                             volume, concentration,
+                                                                                             immobilization_probability,
+                                                                                             figure_size))
+
 def with_args_from_file(method, file_path, header_rows=1):
     reader = SimpleCsv()
     reader.read(file_path, ",")
@@ -269,10 +290,11 @@ def with_args_from_file(method, file_path, header_rows=1):
 
 
 if __name__ == '__main__':
-    sys.stdout = open('generated/interlinking_simulation.txt', 'w')
+    # sys.stdout = open('generated/interlinking_simulation.txt', 'w')
     print("Simulation started at ", datetime.now())
     # with_args_from_file(create_surface, "./simulation_parameters/surface_plots.csv")
+    with_args_from_file(create_surface_from_drop_statistics, "./simulation_parameters/surface_from_drop_plots.csv")
     # with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
-    with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
-    sys.stdout.close()
+    # with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
+    # sys.stdout.close()
     # plt.show()

@@ -149,6 +149,7 @@ class RandomSurface:
 
     def distribute_targets_from_liquid_drop(self, area: float, total_surface_area: float, drop_volume: float, drop_concentration: float, target_immobilization_probability: float):
         number_of_targets = drop_concentration * drop_volume * constants.Avogadro * target_immobilization_probability
+        print(fr"Number of targets: {number_of_targets:.0}")
         return self.distribute_number_of_targets(area, number_of_targets, total_surface_area)
 
     def distribute_number_of_targets(self, area: float, number_of_targets: int, total_surface_area: float = None):
@@ -239,8 +240,14 @@ class RandomSurface:
         y_indices = range(self.grid.min_y_index(y_min), self.grid.max_y_index(y_max) + 1)
         return [(x, y) for x in x_indices for y in y_indices]
 
-    def average_distance_to_closest_neighbor(self):
-        return self.average_distance(self.coordinates, self.coordinates_with_padding)
+    def distance_to_closest_neighbor_average(self):
+        return self.distance_average(self.coordinates, self.coordinates_with_padding)
+
+    def distance_to_closest_neighbor_stddev(self):
+        return self.distance_stddev(self.coordinates, self.coordinates_with_padding)
+
+    def distances_to_closest_neighbor(self):
+        return self.closest_neighbor_distances(self.coordinates, self.coordinates_with_padding)
 
     def average_distance_to_neighbors(self):
         return self.average_distance_within(self.max_neighbor_distance(), self.coordinates,
@@ -264,13 +271,21 @@ class RandomSurface:
         return list(c.y for c in coordinates)
 
     @staticmethod
-    def average_distance(coordinates, neighbors):
+    def distance_average(coordinates, neighbors):
+        return mean(RandomSurface.closest_neighbor_distances(coordinates, neighbors))
+
+    @staticmethod
+    def distance_stddev(coordinates, neighbors):
+        return stdev(RandomSurface.closest_neighbor_distances(coordinates, neighbors))
+
+    @staticmethod
+    def closest_neighbor_distances(coordinates, neighbors):
         closest_neighbor_distance = list()
 
         for coordinate in coordinates:
             neighbor = coordinate.closest_neighbor(neighbors)
             closest_neighbor_distance.append(coordinate.distance_to(neighbor))
-        return mean(closest_neighbor_distance)
+        return closest_neighbor_distance
 
     @staticmethod
     def average_distance_within(within, coordinates, neighbors):
