@@ -1,5 +1,6 @@
 from __future__ import annotations
 from math import *
+from scipy import constants
 from statistics import *
 import random
 import matplotlib.pyplot as plt
@@ -131,16 +132,43 @@ class RandomSurface:
         self.target_distance = 0
 
     def initialize(self, x_max: float, y_max: float, average_distance: float, verbose=True):
-        self.x_length = x_max
-        self.y_length = y_max
-        self.target_distance = average_distance
-        indices = self.padded_indices(x_max, y_max, average_distance)
-        number_of_coordinates = int(len(indices) * self.probability(average_distance))
+        coordinates, indices = self.distribute_targets(x_max, y_max, self.padding_distance(average_distance))
 
-        random.shuffle(indices)
-        coordinates = list(self.coordinates_from(indices, number_of_coordinates))
+        self.target_distance = average_distance
         self.coordinates_with_padding, self.coordinates, self.padding = \
             self.optimize_coordinates(indices, coordinates, x_max, y_max, average_distance, verbose)
+
+    def distribute_targets(self, x_length: float, y_length: float, padding: float, probability_of_occupation: float):
+        self.x_length = x_length
+        self.y_length = y_length
+        indices = self.indices_with_padding(x_length, y_length, padding)
+        number_of_coordinates = int(len(indices) * probability_of_occupation)
+
+        random.shuffle(indices)
+        return list(self.coordinates_from(indices, number_of_coordinates)), indices
+
+    def distribute_targets_from_liquid_drop(self, area: float, total_surface_area: float, drop_volume: float, drop_concentration: float, target_immobilization_probability: float):
+        number_of_targets = drop_concentration * drop_volume * constants.Avogadro * target_immobilization_probability
+        return self.distribute_number_of_targets(area, number_of_targets, total_surface_area)
+
+    def distribute_number_of_targets(self, area: float, number_of_targets: int, total_surface_area: float = None):
+        if total_surface_area is None:
+            total_surface_area = area
+        side_length = sqrt(area)
+        available_spots = total_surface_area / self.grid.unit_area()
+        probability_of_occupation = number_of_targets / available_spots
+        if probability_of_occupation > 1:
+            raise Exception(f"Probability is too high: {probability_of_occupation}")
+
+        coordinates, _ = self.distribute_targets(side_length, side_length, side_length*0.1, probability_of_occupation)
+        self.target_distance = None
+        self.coordinates_with_padding, self.coordinates, self.padding = \
+            self.separate_coordinates(coordinates, side_length, side_length)
+
+    def separate_coordinates(self, coordinates, x_max: float, y_max: float):
+        inner_coordinates = list(self.coordinates_within(coordinates, 0, x_max, 0, y_max))
+        padding = list(c for c in coordinates if c not in inner_coordinates)
+        return coordinates, inner_coordinates, padding
 
     def optimize_coordinates(self, indices, coordinates, x_max: float, y_max: float, expected_distance: float, verbose=True):
         while True:
@@ -176,6 +204,8 @@ class RandomSurface:
         return coordinates, indices
 
     def max_neighbor_distance(self):
+        if self.target_distance is None:
+            return inf
         return 1.5 * self.target_distance
 
     def reposition_coordinate(self, coordinates, indices):
@@ -199,6 +229,9 @@ class RandomSurface:
 
     def padded_indices(self, x_max: float, y_max: float, average_distance: float, x_min: float = 0, y_min: float = 0):
         padding = self.padding_distance(average_distance)
+        return self.indices_with_padding(x_max, y_max, padding, x_min, y_min)
+
+    def indices_with_padding(self, x_max: float, y_max: float, padding: float, x_min: float = 0, y_min: float = 0):
         return self.indices_within(x_min - padding, x_max + padding, y_min - padding, y_max + padding)
 
     def indices_within(self, x_min: float, x_max: float, y_min: float, y_max: float):
@@ -266,5 +299,19 @@ def create_surface(grid_size, width, height, distance, figure_size, show_plot=Fa
     if show_plot: plt.show()
 
 
+def create_surface_from_drop(grid_size, simulation_area, total_area, volume, concentration, immobilization_probability, figure_size, show_plot=False):
+    grid = HexagonalGrid(grid_size)
+    surface = RandomSurface(grid)
+    surface.distribute_targets_from_liquid_drop(simulation_area, total_area, volume, concentration, immobilization_probability)
+    surface.visualization(figure_size)
+
+    tikzplotlib.save("./generated/surface_from_drop_g{}_sa{}_ta{}_v{}_c{}_p{}_f{}.tex".format(grid_size, simulation_area, total_area, volume, concentration, immobilization_probability, figure_size))
+    if show_plot: plt.show()
+
+
 if __name__ == '__main__':
-    create_surface(2.5, 1000, 100, 5)
+    # create_surface(2.5, 1000, 100, 5)
+    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 1.000, 1, 5, True)
+    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.500, 1, 5, True)
+    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.250, 1, 5, True)
+    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.125, 1, 5, True)
