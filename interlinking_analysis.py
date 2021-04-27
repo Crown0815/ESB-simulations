@@ -262,23 +262,31 @@ def create_statistics(grid_size, width, height, distance, link_length, linkable_
 def create_surface_from_drop_statistics(grid_size, simulation_area, total_area, volume, concentration, immobilization_probability, figure_size):
     grid = HexagonalGrid(grid_size)
     surface = RandomSurface(grid)
-    distances = list()
+    means = list()
+    stdevs = list()
 
-    for index in range(10):
-        print(fr"Surface {index:3}:")
+    number_of_targets = volume * concentration * constants.Avogadro * immobilization_probability
+
+    sys.stdout = open(fr'generated/surface_from_drop_with_{number_of_targets:.0}_targets.csv', 'w')
+
+    print("surface, label, distance_average, distance_stddev")
+    surface_count = 10
+    for index in range(surface_count):
         surface.distribute_targets_from_liquid_drop(simulation_area, total_area, volume, concentration, immobilization_probability)
         closest_neighbors = surface.distances_to_closest_neighbor()
-        print(fr"Distances: {closest_neighbors}")
-        print(fr"Distance to closest neighbor: {statistics.mean(closest_neighbors):.2f} ± {statistics.stdev(closest_neighbors):.2f})")
-        distances.append(surface.distance_to_closest_neighbor_average())
+        # print(fr"Distances: {closest_neighbors}")
+        print(fr"{index:3}, {index:3}, {statistics.mean(closest_neighbors):.2f}, {statistics.stdev(closest_neighbors):.2f}")
+        means.append(statistics.mean(closest_neighbors))
+        stdevs.append(statistics.stdev(closest_neighbors))
 
-    print(fr"Average distance to closest neighbor: {statistics.mean(distances):.2f} ± {statistics.stdev(distances):.2f})")
+    print(fr"{surface_count+1}, mean, {statistics.mean(means):.2f}, {statistics.mean(stdevs):.2f}")
+    sys.stdout.close()
+    sys.stdout = sys.__stdout__
+    # print(fr"stddev, {statistics.stdev(means):.2f}, {statistics.stdev(stdevs):.2f}")
     surface.visualization(figure_size)
-    tikzplotlib.save("./generated/surface_from_drop_g{}_sa{}_d{}_v{}_c{}_p{}_f{}.tex".format(grid_size, simulation_area,
-                                                                                             sqrt(total_area/pi/2)*2,
-                                                                                             volume, concentration,
-                                                                                             immobilization_probability,
-                                                                                             figure_size))
+    tikzplotlib.save(f"./generated/surface_from_drop_g{grid_size}_sa{simulation_area}_d{sqrt(total_area / pi / 2) * 2}_"
+                     f"n{number_of_targets:.0}.tex")
+
 
 def with_args_from_file(method, file_path, header_rows=1):
     reader = SimpleCsv()

@@ -149,7 +149,6 @@ class RandomSurface:
 
     def distribute_targets_from_liquid_drop(self, area: float, total_surface_area: float, drop_volume: float, drop_concentration: float, target_immobilization_probability: float):
         number_of_targets = drop_concentration * drop_volume * constants.Avogadro * target_immobilization_probability
-        print(fr"Number of targets: {number_of_targets:.0}")
         return self.distribute_number_of_targets(area, number_of_targets, total_surface_area)
 
     def distribute_number_of_targets(self, area: float, number_of_targets: int, total_surface_area: float = None):
