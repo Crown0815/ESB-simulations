@@ -159,8 +159,7 @@ class RandomSurface:
         probability_of_occupation = number_of_targets / available_spots
         if probability_of_occupation > 1:
             raise Exception(f"Probability is too high: {probability_of_occupation}")
-
-        coordinates, _ = self.distribute_targets(side_length, side_length, side_length*0.1, probability_of_occupation)
+        coordinates, _ = self.distribute_targets(side_length, side_length, 0, probability_of_occupation)
         self.target_distance = None
         self.coordinates_with_padding, self.coordinates, self.padding = \
             self.separate_coordinates(coordinates, side_length, side_length)

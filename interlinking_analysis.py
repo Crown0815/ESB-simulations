@@ -260,10 +260,13 @@ def create_statistics(grid_size, width, height, distance, link_length, linkable_
 
 
 def create_surface_from_drop_statistics(grid_size, simulation_area, total_area, volume, concentration, immobilization_probability, figure_size):
+    if figure_size == 0:
+        return
+    simulation_area = 2*simulation_area
     grid = HexagonalGrid(grid_size)
     surface = RandomSurface(grid)
+    all_neighbors = list()
     means = list()
-    stdevs = list()
 
     number_of_targets = volume * concentration * constants.Avogadro * immobilization_probability
 
@@ -276,16 +279,20 @@ def create_surface_from_drop_statistics(grid_size, simulation_area, total_area, 
         closest_neighbors = surface.distances_to_closest_neighbor()
         # print(fr"Distances: {closest_neighbors}")
         print(fr"{index:3}, {index:3}, {statistics.mean(closest_neighbors):.2f}, {statistics.stdev(closest_neighbors):.2f}")
-        means.append(statistics.mean(closest_neighbors))
-        stdevs.append(statistics.stdev(closest_neighbors))
+        all_neighbors.extend(closest_neighbors)
+        means.append(mean(closest_neighbors))
 
-    print(fr"{surface_count+1}, mean, {statistics.mean(means):.2f}, {statistics.mean(stdevs):.2f}")
+    print(fr"{surface_count+1}, all , {statistics.mean(all_neighbors):.2f}, {statistics.stdev(all_neighbors):.2f}")
+    sys.stdout.close()
+
+    sys.stdout = open(fr'generated/surface_from_drop_average_deviation.csv', 'a')
+    print(fr"{concentration}, {statistics.mean(all_neighbors):.2f}, {statistics.stdev(means):.2f}")
     sys.stdout.close()
     sys.stdout = sys.__stdout__
     # print(fr"stddev, {statistics.stdev(means):.2f}, {statistics.stdev(stdevs):.2f}")
-    surface.visualization(figure_size)
-    tikzplotlib.save(f"./generated/surface_from_drop_g{grid_size}_sa{simulation_area}_d{sqrt(total_area / pi / 2) * 2}_"
-                     f"n{number_of_targets:.0}.tex")
+    # surface.visualization(figure_size)
+    # tikzplotlib.save(f"./generated/surface_from_drop_g{grid_size}_sa{simulation_area}_d{sqrt(total_area / pi / 2) * 2}_"
+    #                  f"n{number_of_targets:.0}.tex")
 
 
 def with_args_from_file(method, file_path, header_rows=1):
@@ -301,6 +308,11 @@ if __name__ == '__main__':
     # sys.stdout = open('generated/interlinking_simulation.txt', 'w')
     print("Simulation started at ", datetime.now())
     # with_args_from_file(create_surface, "./simulation_parameters/surface_plots.csv")
+
+    sys.stdout = open(fr'generated/surface_from_drop_average_deviation.csv', 'w')
+    print("concentration, distance_average, distance_stddev")
+    sys.stdout.close()
+    sys.stdout = sys.__stdout__
     with_args_from_file(create_surface_from_drop_statistics, "./simulation_parameters/surface_from_drop_plots.csv")
     # with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
     # with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
