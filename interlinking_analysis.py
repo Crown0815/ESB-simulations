@@ -247,6 +247,7 @@ def create_linked_surface(grid_size, width, height, distance, link_length, linka
 
 
 def create_statistics(grid_size, width, height, distance, link_length, linkable_length, max_links, run_count):
+    grid_size = distance / 2
     simulation = LinkingSimulation(link_length, linkable_length, width, height, grid_size, max_links)
     simulation_statistics = LinkingSimulationStatistics()
     for _ in tqdm.tqdm(range(run_count)):
@@ -295,6 +296,12 @@ def create_surface_from_drop_statistics(grid_size, simulation_area, total_area, 
     #                  f"n{number_of_targets:.0}.tex")
 
 
+def optimal_distance_for(_, __, total_area: float, volume: float, concentration: float, immobilization_probability: float, ___):
+    number_of_targets = concentration * volume * constants.Avogadro * immobilization_probability
+    area_per_target = total_area / number_of_targets
+    print(Hexagon.inner_from_area(area_per_target))
+
+
 def with_args_from_file(method, file_path, header_rows=1):
     reader = SimpleCsv()
     reader.read(file_path, ",")
@@ -309,11 +316,11 @@ if __name__ == '__main__':
     print("Simulation started at ", datetime.now())
     # with_args_from_file(create_surface, "./simulation_parameters/surface_plots.csv")
 
-    sys.stdout = open(fr'generated/surface_from_drop_average_deviation.csv', 'w')
-    print("concentration, distance_average, distance_stddev")
-    sys.stdout.close()
-    sys.stdout = sys.__stdout__
-    with_args_from_file(create_surface_from_drop_statistics, "./simulation_parameters/surface_from_drop_plots.csv")
+    # sys.stdout = open(fr'generated/surface_from_drop_average_deviation.csv', 'w')
+    # print("concentration, distance_average, distance_stddev")
+    # sys.stdout.close()
+    # sys.stdout = sys.__stdout__
+    with_args_from_file(optimal_distance_for, "./simulation_parameters/surface_from_drop_plots.csv")
     # with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
     # with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
     # sys.stdout.close()

@@ -26,6 +26,10 @@ class Hexagon:
     def inner_to_outer(inner_hexagon_radius: float):
         return inner_hexagon_radius / Hexagon.outer_to_inner_factor
 
+    @staticmethod
+    def inner_from_area(area: float):
+        return sqrt(area /(2 * sqrt(3)))
+
 
 class HexagonalGrid:
 
@@ -132,7 +136,9 @@ class RandomSurface:
         self.target_distance = 0
 
     def initialize(self, x_max: float, y_max: float, average_distance: float, verbose=True):
-        coordinates, indices = self.distribute_targets(x_max, y_max, self.padding_distance(average_distance))
+        coordinates, indices = self.distribute_targets(x_max, y_max,
+                                                       self.padding_distance(average_distance),
+                                                       self.probability(average_distance))
 
         self.target_distance = average_distance
         self.coordinates_with_padding, self.coordinates, self.padding = \
