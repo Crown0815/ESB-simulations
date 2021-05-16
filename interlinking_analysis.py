@@ -321,7 +321,7 @@ if __name__ == '__main__':
     # sys.stdout.close()
     # sys.stdout = sys.__stdout__
     # with_args_from_file(optimal_distance_for, "./simulation_parameters/surface_from_drop_plots.csv")
-    # with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
-    with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
+    with_args_from_file(create_linked_surface, "./simulation_parameters/interlinking_plots.csv")
+    # with_args_from_file(create_statistics, "./simulation_parameters/interlinking_statistics.csv")
     # sys.stdout.close()
     # plt.show()

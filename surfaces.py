@@ -329,8 +329,8 @@ def create_surface_from_drop(grid_size, simulation_area, total_area, volume, con
 
 
 if __name__ == '__main__':
-    # create_surface(2.5, 1000, 100, 5)
-    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 1.000, 1, 5, True)
-    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.500, 1, 5, True)
-    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.250, 1, 5, True)
-    create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.125, 1, 5, True)
+    create_surface(40.5, 1000, 1000, 81, 5)
+    # create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 1.000, 1, 5, True)
+    # create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.500, 1, 5, True)
+    # create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.250, 1, 5, True)
+    # create_surface_from_drop(2.5e-9, 500e-9**2, 2*pi*65e-6**2, 1e-9, 1e-7 * 0.125, 1, 5, True)
