@@ -167,16 +167,17 @@ def compare_line_vs_area_charge_density(potentials, length, radius, line_charge_
     area_result = normalized_fluorescence(potentials, length, radius, area_charge_density, free_electric_energy_2d)
     area_fluorescence = list(area_result.values())
 
-    line_result = normalized_fluorescence(_potentials, length, radius, line_charge_density, free_electric_energy_1d)
-    line_fluorescence = list(line_result.values())
+    # line_result = normalized_fluorescence(_potentials, length, radius, line_charge_density, free_electric_energy_1d)
+    # line_fluorescence = list(line_result.values())
 
     spacer_result = normalized_fluorescence(_potentials, length, radius, area_charge_density, free_electric_energy_2d_48mer_spacer)
     spacer_fluorescence = list(spacer_result.values())
 
-    print(f'Inflection points for line charge density: {inflection_point(line_result)}, area charge density: {inflection_point(area_result)}, area charge density with spacer: {inflection_point(spacer_result)}')
-    print(f'Inflection point slope for line charge density: {inflection_point_slope(line_result)}, area charge density: {inflection_point_slope(area_result)}, area charge density with spacer: {inflection_point_slope(spacer_result)}')
+    print(f'Inflection points for area charge density: {inflection_point(area_result)}, area charge density with spacer: {inflection_point(spacer_result)}')
+    print(f'Inflection point slope for area charge density: {inflection_point_slope(area_result)}, area charge density with spacer: {inflection_point_slope(spacer_result)}')
 
-    plt.plot(potentials, line_fluorescence, color+':', potentials, area_fluorescence, color+"--", potentials, spacer_fluorescence, color)
+    # plt.plot(potentials, line_fluorescence, color+':', potentials, area_fluorescence, color+"--", potentials, spacer_fluorescence, color)
+    plt.plot(potentials, area_fluorescence, color+"--", potentials, spacer_fluorescence, color)
 
 
 if __name__ == "__main__":
