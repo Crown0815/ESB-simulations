@@ -30,13 +30,15 @@ rho_A_linker = rho_A_dna            # effective area charge density in [C/m^2]
 r_linker = r_dna                    # radius of linker [m]
 
 # 4HB Origami constants
+xi_4bh = xi * 4
 r_4hb = 3.14e-9                     # radius of 4 helix bundle cylinder [m]
-rho_4hb = -8*e/(b*xi)               # effective line charge density in [C/m]
+rho_4hb = -8*e/(b*xi_4bh)           # effective line charge density in [C/m]
 rho_A_4hb = rho_4hb/(2*r_4hb)       # effective area charge density in [C/m^2]
 
 # 6HB Origami constants
+xi_6bh = xi_4bh
 r_6hb = 3.9e-9                      # radius of 6 helix bundle cylinder [m]
-rho_6hb = -12*e/(b*xi)              # effective line charge density in [C/m]
+rho_6hb = -12*e/(b*xi_6bh)          # effective line charge density in [C/m]
 rho_A_6hb = rho_6hb/(2*r_6hb)       # effective area charge density in [C/m^2]
 
 # Protein constants
@@ -163,7 +165,7 @@ def potential_at_distance(distance: float, start_potential: float) -> float:
     return start_potential * exp(-kappa * distance)
 
 
-def compare_line_vs_area_charge_density(potentials, length, radius, line_charge_density, area_charge_density, color):
+def compare_line_vs_area_charge_density(potentials, length, radius, area_charge_density, color, mode):
     area_result = normalized_fluorescence(potentials, length, radius, area_charge_density, free_electric_energy_2d)
     area_fluorescence = list(area_result.values())
 
@@ -177,7 +179,10 @@ def compare_line_vs_area_charge_density(potentials, length, radius, line_charge_
     print(f'Inflection point slope for area charge density: {inflection_point_slope(area_result)}, area charge density with spacer: {inflection_point_slope(spacer_result)}')
 
     # plt.plot(potentials, line_fluorescence, color+':', potentials, area_fluorescence, color+"--", potentials, spacer_fluorescence, color)
-    plt.plot(potentials, area_fluorescence, color+"--", potentials, spacer_fluorescence, color)
+    if mode is "spacer":
+        plt.plot(potentials, spacer_fluorescence, color)
+    if mode is "area":
+        plt.plot(potentials, area_fluorescence, color)
 
 
 if __name__ == "__main__":
@@ -187,10 +192,10 @@ if __name__ == "__main__":
     #     for angle, probability in probabilities.items():
     #         print(f'{potential:.2f}\t\t{angle/pi*180:.2f}\t\t{probability:.8f}\\\\')
 
-    compare_line_vs_area_charge_density(_potentials,  16e-9, r_dna, rho_dna, rho_A_dna, 'b')
-    compare_line_vs_area_charge_density(_potentials,  32e-9, r_dna, rho_dna, rho_A_dna, 'g')
-    compare_line_vs_area_charge_density(_potentials,  50e-9, r_4hb, rho_4hb, rho_A_4hb, 'r')
-    compare_line_vs_area_charge_density(_potentials, 100e-9, r_6hb, rho_6hb, rho_A_6hb, 'c')
+    compare_line_vs_area_charge_density(_potentials,  16e-9, r_dna, rho_A_dna, 'b', "area")
+    compare_line_vs_area_charge_density(_potentials,  32e-9, r_dna, rho_A_dna, 'g', "area")
+    compare_line_vs_area_charge_density(_potentials,  50e-9, r_4hb, rho_A_4hb, 'r', "spacer")
+    compare_line_vs_area_charge_density(_potentials, 100e-9, r_6hb, rho_A_6hb, 'c', "spacer")
     plt.show()
 
 
